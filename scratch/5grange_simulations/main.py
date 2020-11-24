@@ -36,25 +36,25 @@ class simulationCase(Enum):
 
 def setup_simulations(createAndRunScenarios):
     resultsDict = {"scenario": {}}
-    numBatches = 25
+    numBatches = 20
     numUEs_and_applications = [# core scenarios
-    #    [  2, [simulationCase.VOIP_BASE_SCENARIO, ]],  # two ues talking to each other
-    #    [  3, [simulationCase.WEB_BASE_SCENARIO, ]],   # three ues connecting to the internet
-    #    [ 20, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO]],  # 30%/70% of ues for voip/web
-    #    [ 50, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO]],  # 30%/70% of ues for voip/web
-    #    [100, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO]],  # 30%/70% of ues for voip/web
-    #    [ 20, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO, simulationCase.STREAMING_BASE_SCENARIO]],  # 30%/70%/10% of ues for voip/web/video
-    #    [ 50, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO, simulationCase.STREAMING_BASE_SCENARIO]],  # 30%/70%/10% of ues for voip/web/video
-    #    [100, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO, simulationCase.STREAMING_BASE_SCENARIO]],  # 30%/70%/10% of ues for voip/web/video
-    #    # e-health,  scenarios
-    #    [  2, [simulationCase.VIDEOCONFERENCE_BASE_SCENARIO, ]],  # two ues talking to each other
-    #    [ 20, [simulationCase.VOIP_BASE_SCENARIO, simulationCase.WEB_BASE_SCENARIO, simulationCase.VIDEOCONFERENCE_BASE_SCENARIO]],  # 30%/70%/5% of ues for voip/web/telemedicine
-    #    [ 50, [simulationCase.VOIP_BASE_SCENARIO, simulationCase.WEB_BASE_SCENARIO, simulationCase.VIDEOCONFERENCE_BASE_SCENARIO]],  # 30%/70%/5% of ues for voip/web/telemedicine
-    #    [100, [simulationCase.VOIP_BASE_SCENARIO, simulationCase.WEB_BASE_SCENARIO, simulationCase.VIDEOCONFERENCE_BASE_SCENARIO]],  # 30%/70%/5% of ues for voip/web/telemedicine
-    #    # iot scenarios
-    #    [ 27, [simulationCase.IOT_BASE_SCENARIO, ]],  # 26 of ues acting as sinks for 100 rural IOT sensors each (a.k.a. traffic of 25k IOT), forwarding data to an aggregator UE
-    #    # backhaul scenario
-        [  1, [simulationCase.BACKHAUL_BASE_SCENARIO, ]],
+        #[  2, [simulationCase.VOIP_BASE_SCENARIO, ]],  # two ues talking to each other
+        #[  3, [simulationCase.WEB_BASE_SCENARIO, ]],   # three ues connecting to the internet
+        #[ 20, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO]],  # 30%/70% of ues for voip/web
+        #[ 50, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO]],  # 30%/70% of ues for voip/web
+        #[100, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO]],  # 30%/70% of ues for voip/web
+        #[ 20, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO, simulationCase.STREAMING_BASE_SCENARIO]],  # 30%/70%/10% of ues for voip/web/video
+        #[ 50, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO, simulationCase.STREAMING_BASE_SCENARIO]],  # 30%/70%/10% of ues for voip/web/video
+        #[100, [simulationCase.VOIP_BASE_SCENARIO,  simulationCase.WEB_BASE_SCENARIO, simulationCase.STREAMING_BASE_SCENARIO]],  # 30%/70%/10% of ues for voip/web/video
+        ## e-health,  scenarios
+        #[  2, [simulationCase.VIDEOCONFERENCE_BASE_SCENARIO, ]],  # two ues talking to each other
+        #[ 20, [simulationCase.VOIP_BASE_SCENARIO, simulationCase.WEB_BASE_SCENARIO, simulationCase.VIDEOCONFERENCE_BASE_SCENARIO]],  # 30%/70%/5% of ues for voip/web/telemedicine
+        #[ 50, [simulationCase.VOIP_BASE_SCENARIO, simulationCase.WEB_BASE_SCENARIO, simulationCase.VIDEOCONFERENCE_BASE_SCENARIO]],  # 30%/70%/5% of ues for voip/web/telemedicine
+        #[100, [simulationCase.VOIP_BASE_SCENARIO, simulationCase.WEB_BASE_SCENARIO, simulationCase.VIDEOCONFERENCE_BASE_SCENARIO]],  # 30%/70%/5% of ues for voip/web/telemedicine
+        # iot scenarios
+        [ 27, [simulationCase.IOT_BASE_SCENARIO, ]],  # 26 of ues acting as sinks for 100 rural IOT sensors each (a.k.a. traffic of 25k IOT), forwarding data to an aggregator UE
+        ## backhaul scenario
+        #[  1, [simulationCase.BACKHAUL_BASE_SCENARIO, ]],
     ]  # 2, 5, 10, 20, 50, 100
 
     # I'm dumb and worn off. This should be enough
@@ -66,7 +66,7 @@ def setup_simulations(createAndRunScenarios):
         numUEs_and_applications[i][1] = caseApplicationSum
 
     numerology_and_numUEs_threshold = [(0, 0), ]  # (2, 20), (3, 50)]
-    dynamic_spectrum_access = [False, ] # True, ]
+    dynamic_spectrum_access = [False, True, ]
     if createAndRunScenarios:
         # Copy injected traffic files to baseDir (where the 5g_range_demonstration_json executable is)
         if not os.path.exists("videoconf_workload0_100s.json"):
@@ -119,7 +119,7 @@ def setup_simulations(createAndRunScenarios):
         thread_parameters.append((simulation_path, baseDir))
 
     # Dispatch simulations
-    p = multiprocessing.Pool(processes=20)  # run simulations in parallel
+    p = multiprocessing.Pool(processes=10)  # run simulations in parallel
     results = p.starmap(func=execute_simulation, iterable=sorted(thread_parameters, reverse=True))
 
     # When all simulations have finished, load up their results and apply some statistics/plots
@@ -142,6 +142,12 @@ def load_raw_results(baseDir):
             with lzma.open(os.path.dirname(scenarioJson) + os.sep + "simulationResults.pickle.lzma", "rb") as file:
                 simulation_results = pickle.load(file)
 
+            # IoT scenario jitter and delay histograms are absolutely huge (25MB)
+            # and their memory structures are even bigger
+            # We deal with them before saving to raw results pickle
+            for flowId in simulation_results['flow_statistics']['applicationPort'][8005]['flows']:
+                del simulation_results['flow_statistics']['applicationPort'][8005]['flows'][flowId]['status']['delayHistogram']
+                del simulation_results['flow_statistics']['applicationPort'][8005]['flows'][flowId]['status']['jitterHistogram']
             scenarioJson = scenarioJson[len(baseDir):]  # remove path to basedir to clean things up
             all_simulation_results[scenarioJson] = [simulation_parameters, simulation_results]
 
@@ -288,22 +294,22 @@ if __name__ == "__main__":
                                                                                                    }
             else:
                 compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['status'] = {"falseNegatives": [],
-                                                                                                            "falsePositives": [],
-                                                                                                            "reportedFramesPerUe": []
-                                                                                                            }
+                                                                                                             "falsePositives": [],
+                                                                                                             "reportedFramesPerUe": []
+                                                                                                             }
                 for channel in compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel']:
                     falseNegativesFraction = list(map(fraction,
                                                       compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["frames_pu_was_active"],
                                                       compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["total_false_negatives"]
                                                       ))
                     falsePositivesFraction = list(map(fraction,
-                                                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["frames_pu_was_inactive"],
-                                                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["total_false_positives"]
-                                                     ))
+                                                      compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["frames_pu_was_inactive"],
+                                                      compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["total_false_positives"]
+                                                      ))
                     reportedFramesFraction = list(map(fraction,
-                                                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["total_fusions"],
-                                                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["avg_bits_per_ue"]
-                                                     ))
+                                                      compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["total_fusions"],
+                                                      compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['channel'][channel]["avg_bits_per_ue"]
+                                                      ))
                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['status']["falseNegatives"].extend(falseNegativesFraction)
                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['status']["falsePositives"].extend(falsePositivesFraction)
                     compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]['sensing']['status']["reportedFramesPerUe"].extend(reportedFramesFraction)
@@ -355,19 +361,20 @@ if __name__ == "__main__":
                         lost_packets = int(status["@lostPackets"])
                         lost_packets_pct = int(status["@lostPackets"])/int(status["@txPackets"])
                         delay_histogram = []
-                        if "bin" in status["delayHistogram"]:
-                            for entry in status["delayHistogram"]["bin"]:
-                                try:
-                                    delay_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
-                                except TypeError:
-                                    continue
                         jitter_histogram = []
-                        if "bin" in status["jitterHistogram"]:
-                            for entry in status["jitterHistogram"]["bin"]:
-                                try:
-                                    jitter_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
-                                except TypeError:
-                                    continue
+                        if port != 8005: # IoT has this data removed due to memory constraints
+                            if "bin" in status["delayHistogram"]:
+                                for entry in status["delayHistogram"]["bin"]:
+                                    try:
+                                        delay_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
+                                    except TypeError:
+                                        continue
+                            if "bin" in status["jitterHistogram"]:
+                                for entry in status["jitterHistogram"]["bin"]:
+                                    try:
+                                        jitter_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
+                                    except TypeError:
+                                        continue
 
                         # Check if individual application of UE meets or exceeds the KPIs established for the application
                         passed = True
@@ -473,8 +480,8 @@ if __name__ == "__main__":
 
 
         # Time to plot boxplots for the applications of each application (column) for each scenario
-        import matplotlib.pyplot as plt
-        fig, axes = plt.subplots(nrows=len(usedAppsDict[simulation_case_key]), ncols=2*1, figsize=(15, 6*len(usedAppsDict[simulation_case_key])), sharey=True, sharex=True, squeeze=False)
+        # Time to plot aggregate throughput boxplots for the applications of each application (column) for each scenario
+        fig, axes = plt.subplots(nrows=len(usedAppsDict[simulation_case_key]), ncols=2*3, figsize=(15, 6*len(usedAppsDict[simulation_case_key])), sharex=True, squeeze=False)
         i = 0
         dsa_labels = ["                      Without\n                        PUs",
                       "                      With PUs\n",
@@ -487,7 +494,7 @@ if __name__ == "__main__":
                 continue
 
             # Each application occupies two columns (downlink and uplink) and 3 rows (without DSA/PUs, with DSA/PUs + OR fusion, with DSA/PUs + Markov+OR)
-            for dsa in list(compiled_simulation_results["case"][simulation_case_key]["dsa"].keys())[:1]:
+            for dsa in compiled_simulation_results["case"][simulation_case_key]["dsa"]:
                 dsa_dl_column = k
                 dsa_ul_column = dsa_dl_column+1
 
@@ -499,6 +506,8 @@ if __name__ == "__main__":
 
                 axes[i][0].set_ylabel("     %s\n Aggregate Throughput (kbps)" % appName)
 
+                axes[i][0].get_shared_y_axes().join(axes[i][0], axes[i][dsa_dl_column])
+                axes[i][0].get_shared_y_axes().join(axes[i][0], axes[i][dsa_ul_column])
 
                 # Plot boxplots with results
                 dl = compiled_simulation_results["case"][simulation_case_key]["appStatusPerPort"]["port"][port]["appStatusPerDsa"]["dsa"][dsa]["agg_dl_throughput_kbps"]
@@ -521,10 +530,6 @@ if __name__ == "__main__":
 
                 axes[i][dsa_dl_column].grid(b=True, which='major', color='#999999', linestyle='-')
                 axes[i][dsa_ul_column].grid(b=True, which='major', color='#999999', linestyle='-')
-                del dl, ul,
-
-                axes[i][dsa_dl_column].set_yticks([x for x in range(25000, 100000, 25000)])
-                axes[i][dsa_ul_column].set_yticks([x for x in range(25000, 100000, 25000)])
 
                 # Next columns
                 k += 2

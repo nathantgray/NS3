@@ -145,9 +145,10 @@ def load_raw_results(baseDir):
             # IoT scenario jitter and delay histograms are absolutely huge (25MB)
             # and their memory structures are even bigger
             # We deal with them before saving to raw results pickle
-            for flowId in simulation_results['flow_statistics']['applicationPort'][8005]['flows']:
-                del simulation_results['flow_statistics']['applicationPort'][8005]['flows'][flowId]['status']['delayHistogram']
-                del simulation_results['flow_statistics']['applicationPort'][8005]['flows'][flowId]['status']['jitterHistogram']
+            #for flowId in simulation_results['flow_statistics']['applicationPort'][8005]['flows']:
+            #    del simulation_results['flow_statistics']['applicationPort'][8005]['flows'][flowId]['status']['delayHistogram']
+            #    del simulation_results['flow_statistics']['applicationPort'][8005]['flows'][flowId]['status']['jitterHistogram']
+
             scenarioJson = scenarioJson[len(baseDir):]  # remove path to basedir to clean things up
             all_simulation_results[scenarioJson] = [simulation_parameters, simulation_results]
 
@@ -157,7 +158,26 @@ def load_raw_results(baseDir):
         with lzma.open(raw_results_file, "rb") as file:
             all_simulation_results = pickle.load(file)
 
-    return all_simulation_results
+        # The old results format use the raw histograms of flowmonitor, decode it to the correct one
+        old_version = False
+        from simulation_results.extract_network_performance_metrics import read_histogram
+        for simulation_key in all_simulation_results:
+            for applicationPort in all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort']:
+                for flowId in all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows']:
+                    old = '@nBins' in all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['delayHistogram']
+                    if old:
+                        old_version = True
+                        h1 = all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['delayHistogram']
+                        h2 = all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['jitterHistogram']
+                        h3 = all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['packetSizeHistogram']
+                        all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['delayHistogram'] = read_histogram(h1)
+                        all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['jitterHistogram'] = read_histogram(h2)
+                        all_simulation_results[simulation_key][1]['flow_statistics']['applicationPort'][applicationPort]['flows'][flowId]['status']['packetSizeHistogram'] = read_histogram(h3)
+                        del h1, h2, h3
+        if old_version:
+            with lzma.open(raw_results_file, "wb") as file:
+                pickle.dump(all_simulation_results, file)
+        return all_simulation_results
 
 
 def interleave_videconf_traffic():
@@ -360,21 +380,28 @@ if __name__ == "__main__":
 
                         lost_packets = int(status["@lostPackets"])
                         lost_packets_pct = int(status["@lostPackets"])/int(status["@txPackets"])
-                        delay_histogram = []
-                        jitter_histogram = []
-                        if port != 8005: # IoT has this data removed due to memory constraints
-                            if "bin" in status["delayHistogram"]:
-                                for entry in status["delayHistogram"]["bin"]:
-                                    try:
-                                        delay_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
-                                    except TypeError:
-                                        continue
-                            if "bin" in status["jitterHistogram"]:
-                                for entry in status["jitterHistogram"]["bin"]:
-                                    try:
-                                        jitter_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
-                                    except TypeError:
-                                        continue
+
+                        if "delayHistogram" not in status:
+                            continue
+                        delay_histogram = status["delayHistogram"]
+
+                        if "jitterHistogram" not in status:
+                            continue
+                        jitter_histogram = status["jitterHistogram"]
+
+                        #if port != 8005: # IoT has this data removed due to memory constraints
+                        #    if "bin" in status["delayHistogram"]:
+                        #        for entry in status["delayHistogram"]["bin"]:
+                        #            try:
+                        #                delay_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
+                        #            except TypeError:
+                        #                continue
+                        #    if "bin" in status["jitterHistogram"]:
+                        #        for entry in status["jitterHistogram"]["bin"]:
+                        #            try:
+                        #                jitter_histogram.extend([float(entry["@start"])]*int(entry["@count"]))
+                        #            except TypeError:
+                        #                continue
 
                         # Check if individual application of UE meets or exceeds the KPIs established for the application
                         passed = True
@@ -388,27 +415,27 @@ if __name__ == "__main__":
 
                         delayMean   = 0
                         delayStdDev = 0
-                        if len(delay_histogram) > 0:
-                            delayMean = numpy.mean(delay_histogram)
-                            delayStdDev = numpy.std(delay_histogram)
-                            # mean + 1.5*sigma = >90% reliable
-                            # mean + 2*sigma = >99% reliable
-                            # mean + 2.5*sigma = >99.9% reliable
-                            if delayMean+2.5*delayStdDev > application_KPIs[port]["latency"]:
-                                passed = False
+                        #if len(delay_histogram) > 0:
+                        #    delayMean = numpy.mean(delay_histogram)
+                        #    delayStdDev = numpy.std(delay_histogram)
+                        #    # mean + 1.5*sigma = >90% reliable
+                        #    # mean + 2*sigma = >99% reliable
+                        #    # mean + 2.5*sigma = >99.9% reliable
+                        #    if delayMean+2.5*delayStdDev > application_KPIs[port]["latency"]:
+                        #        passed = False
 
                         jitterMean   = 0
                         jitterStdDev = 0
-                        if len(jitter_histogram) > 0:
-                            jitterMean = numpy.mean(jitter_histogram)
-                            jitterStdDev = numpy.std(jitter_histogram)
-                            if jitterMean+2.5*jitterStdDev > application_KPIs[port]["latency"]:
-                                passed = False
+                        #if len(jitter_histogram) > 0:
+                        #    jitterMean = numpy.mean(jitter_histogram)
+                        #    jitterStdDev = numpy.std(jitter_histogram)
+                        #    if jitterMean+2.5*jitterStdDev > application_KPIs[port]["latency"]:
+                        #        passed = False
 
-                        if passed:
-                            compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["passed_kpi"].append(flow)
-                        else:
-                            compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["failed_kpi"].append(flow)
+                        #if passed:
+                        #    compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["passed_kpi"].append(flow)
+                        #else:
+                        #    compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["failed_kpi"].append(flow)
 
                         # Aggregate application performance of multiple UEs to get overall picture for the simulation
                         compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["dl_throughput_kbps"].append(dl_throughput_kbps)
@@ -481,7 +508,9 @@ if __name__ == "__main__":
 
         # Time to plot boxplots for the applications of each application (column) for each scenario
         # Time to plot aggregate throughput boxplots for the applications of each application (column) for each scenario
-        fig, axes = plt.subplots(nrows=len(usedAppsDict[simulation_case_key]), ncols=2*3, figsize=(15, 6*len(usedAppsDict[simulation_case_key])), sharex=True, squeeze=False)
+        fig, axes = plt.subplots(nrows=len(usedAppsDict[simulation_case_key]),
+                                 ncols=2*len(compiled_simulation_results["case"][simulation_case_key]["dsa"]),
+                                 figsize=(6*len(compiled_simulation_results["case"][simulation_case_key]["dsa"]), 6*len(usedAppsDict[simulation_case_key])), sharey=True, sharex=True, squeeze=False)
         i = 0
         dsa_labels = ["                      Without\n                        PUs",
                       "                      With PUs\n",
@@ -567,13 +596,19 @@ if __name__ == "__main__":
 
                             lost_packets.extend(compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["lost_packets_pct"])
                         elif metric == "delay":
-                            for (_, mean, std) in compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["delay_n_mean_std"]:
-                                delay_hist_agg.extend([max(mean-2*std, 0.001), max(mean, 0.001), max(mean+2*std, 0.001)])
-                                del _, mean, std
+                            for (h, mean, std) in compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["delay_n_mean_std"]:
+                                histogram = []
+                                for (x, y) in h.items():
+                                    histogram.extend([x]*y)
+                                delay_hist_agg.extend(histogram)
+                                del h, mean, std, histogram
                         else:
-                            for (_, mean, std) in compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["jitter_n_mean_std"]:
-                                jitter_hist_agg.extend([max(mean-2*std, 0.001), max(mean, 0.001), max(mean+2*std, 0.001)])
-                            del _, mean, std
+                            for (h, mean, std) in compiled_simulation_results["case"][simulation_case_key]["dsa"][dsa]["flow_per_batch"][batch]["applicationPort"][port]["appStatus"]["jitter_n_mean_std"]:
+                                histogram = []
+                                for (x, y) in h.items():
+                                    histogram.extend([x]*y)
+                                jitter_hist_agg.extend(histogram)
+                                del h, mean, std, histogram
                     del batch
 
                     if metric == "lostPackets":

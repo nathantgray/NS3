@@ -1,6 +1,6 @@
 import re
 import random
-
+import lzma
 
 def plot_mcs_hist(axis, mcs_freq_per_d):
     i = 0
@@ -25,14 +25,14 @@ def plot_mcs_dist(ds=(1, 10, 20, 35, 50,),
         mcs_freq_per_d[d] = {"mcs": {}}
 
         contents = None
-        with open(base_dir + "out%dkm.txt" % d, "r") as file:
+        with lzma.open(base_dir + "out%dkm.txt.lzma" % d, "r") as file:
             contents = file.readlines()
         del file
 
         mcs_regex = re.compile(".*MCS (.*) TBLER .*")
         mcs = None
         for line in contents:
-            regex = mcs_regex.match(line)
+            regex = mcs_regex.match(line.decode('utf-8'))
             if regex is None:
                 continue
             mcs = regex.groups()[0]

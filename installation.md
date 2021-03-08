@@ -14,6 +14,7 @@ Before proceeding you will need:
     5. unzip
     6. curl 
     7. tar
+    8. pkg-config (for VcPkg on Linux)
     
 Those are basic pre-requisites for both ns-3 and VcPkg, used in this version of ns-3 for dependencies installation. The [official ns-3 branch](https://gitlab.com/nsnam/ns-3-dev/) uses Bake for dependencies installation.
 

@@ -4,7 +4,9 @@ title: Installation
 permalink: /installation
 ---
 ## 0. How to download, build and debug ns-3 with CMake video (assumes pre-existing toolchain and pre-configured environment)
-[![](http://img.youtube.com/vi/db4-Zz5M3oA/0.jpg)](http://www.youtube.com/watch?v=db4-Zz5M3oA "NS-3 with CMake - How to configure, build and debug on CLion (MinGW, WSL, MacOS), Xcode, CodeBlocks")
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## 1. Pre-requisites
 
 ### 1.1 Toolchain

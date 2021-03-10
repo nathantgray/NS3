@@ -3,9 +3,10 @@ layout: page
 title: Installation
 permalink: /installation
 ---
-### 0. How to download, build and debug ns-3 with CMake video (assumes pre-existing toolchain and pre-configured environment)
+## 0. Video: How to download, build and debug ns-3 with CMake 
 
-Enable the subtitles
+Assumes pre-existing toolchain and pre-configured environment.
+Remember to enable the subtitles.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 

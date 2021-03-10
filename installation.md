@@ -3,8 +3,12 @@ layout: page
 title: Installation
 permalink: /installation
 ---
+## 0. How to download, build and debug ns-3 with CMake video (assumes pre-existing toolchain and pre-configured environment)
+[https://youtu.be/db4-Zz5M3oA](https://youtu.be/db4-Zz5M3oA)
 
 ## 1. Pre-requisites
+
+### 1.1 Toolchain
 Before proceeding you will need: 
 
     1. git
@@ -18,7 +22,29 @@ Before proceeding you will need:
     
 Those are basic pre-requisites for both ns-3 and VcPkg, used in this version of ns-3 for dependencies installation. The [official ns-3 branch](https://gitlab.com/nsnam/ns-3-dev/) uses Bake for dependencies installation.
 
-## 2. Fetching the code
+### 1.2 Configure the environment
+
+#### 1.2.1 Msys2
+Msys2 offers a ton of Unix/Posix tools on Windows. To install it, first go to [MSYS2 page](https://www.msys2.org/), download and run the installer.
+After that you can change the path in buildsupport/macros_and_definitions.cmake. Or make our life easier and add `DRIVE_LETTER:\\path_where_you_installed_msys\\msys64\\mingw64\\bin` folder to your PATH. 
+
+#### 1.2.1 WSL
+WSL is awesome (the v1, v2 is just a glorified VM managed by MSFT). You can have both versions simultaneously, but that is really unnecessary.
+Before telling you the WSL page, I must inform you that you should read the rest of this section before installing anything.
+
+When installing WSLv1, you won't need to enable the Virtual Machine Platform (VM support in MSFT speak). 
+Pros: you can see linux processes on Windows task manager, enabling VM support makes Windows run on top of the Hypervisor (Hyper-V), which in turn prevents the host OS (a.k.a. Windows) from accessing a ton of performance counters (used by AMD uProf, Intel V-Tune and others). 
+Cons: [filesystem performance is trash](https://github.com/microsoft/WSL/issues/873), [long doubles are 64 bit instead of 80 bit](https://github.com/microsoft/WSL/issues/830), Qt and other libraries may have [an ABI section which is not parsed correctly](https://github.com/microsoft/WSL/issues/3023) and cause issues, [stack execution is prohibited](https://github.com/microsoft/WSL/issues/2553#issuecomment-335201548), etc.
+
+If you want to use WSLv1 without having to install the Virtual Machine garbo, first enable WSL and then run `wsl --set-default-version 1` on the command prompt with administrative rights. That will prevent distributions from trying to use WSLv2, which will require you to install Virtual Machine Platform to finish installation and then allow you to migrate to WSLv1.
+
+WSLv2 on the other hand is a glorified VM running on top of the Hypervisor (not Windows).
+If you access stuff from WSL mounts (e.g. `/mnt/c/Users/Gabriel/Desktop`) you have [even worse performance than in WSLv1](https://github.com/microsoft/WSL/issues/4197).
+This is why I still use v1 and will continue to do so. If you put your code inside the VM, performance is near baremetal. 
+
+To install either of them, go to [WSL installation page](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+## 2. Getting the code
 After installing the dependencies, clone the [ns-3 with CMake](https://github.com/Gabrielcarvfer/NS3) repository. 
 ```
 git clone https://github.com/Gabrielcarvfer/NS3.git
@@ -27,6 +53,10 @@ git clone https://github.com/Gabrielcarvfer/NS3.git
 You can use shallow clone to speed things up.
 ```
 git clone --branch master --single-branch https://github.com/Gabrielcarvfer/NS3.git
+```
+or
+```
+git clone --depth 1 https://github.com/Gabrielcarvfer/NS3.git
 ```
 
 ## 3. CMake configuration 

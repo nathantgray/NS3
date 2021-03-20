@@ -38,3 +38,21 @@ build/
 /.project
 
 version.cache
+
+cmake-build-debug/
+
+.idea/
+
+3rd-party/vcpkg/
+
+3rd-party/libtorch.zip
+
+3rd-party/libtorch/
+
+configFile.cmake
+
+cmake-build-relwithdebinfo/
+
+utils/failed_tests.json
+
+cmake-build-minsizerel/

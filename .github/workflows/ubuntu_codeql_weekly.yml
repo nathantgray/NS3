@@ -1,0 +1,28 @@
+name: "Ubuntu weekly CodeQL"
+
+on:
+  schedule:
+  - cron:  '0 8 * * 1'  # every Monday at 8AM
+jobs:
+
+  CodeQL:
+    name: Analyze
+    runs-on: ubuntu-latest
+    needs: Ubuntu
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
+        # Learn more:
+        # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1

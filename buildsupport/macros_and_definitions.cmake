@@ -183,6 +183,31 @@ macro(process_options)
         endif()
     endif()
 
+    find_program(CLANG_TIDY clang-tidy)
+    if (CLANG_TIDY)
+        set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-*,readability-*")
+    else()
+        message(STATUS "Proceeding without clang-tidy static analysis")
+    endif()
+
+    find_program(CLANG_FORMAT clang-format)
+    if (CLANG_FORMAT)
+        file(GLOB_RECURSE
+                ALL_CXX_SOURCE_FILES
+                src/*.cc src/*.h
+                examples/*.cc examples/*.h
+                utils/*.cc utils/*.h
+                scratch/*.cc scratch/*.h
+                )
+        add_custom_target(clang-format
+                COMMAND clang-format -style=file -i ${ALL_CXX_SOURCE_FILES}
+                )
+        unset(ALL_CXX_SOURCE_FILES)
+    else()
+        message(STATUS "Proceeding without clang-format target")
+    endif()
+
+
 
     #Set common include folder
     include_directories(${CMAKE_OUTPUT_DIRECTORY})

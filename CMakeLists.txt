@@ -19,7 +19,7 @@ include(buildsupport/macros_and_definitions.cmake)
 
 set(NS3_VER 3.33.0)
 
-option(NS3_LOG "Enable logging to be built" ON)
+option(NS3_LOG "Enable logging to be built" OFF)
 
 option(NS3_ASSERT "Enable assert on failure" OFF)
 
@@ -41,17 +41,17 @@ option(NS3_OPENFLOW "Build with Openflow support" OFF)
 
 option(NS3_GTK2 "Build with GTK2 support" OFF)
 
-option(NS3_MPI "Build with MPI support" OFF)
+option(NS3_MPI "Build with MPI support" ON)
 
 option(NS3_PYTORCH "Build components that rely on PyTorch support" OFF)
 
-option(NS3_GSL "Build with GSL support" OFF)
+option(NS3_GSL "Build with GSL support" ON)
 
 option(NS3_PLANETLAB "Build with Planetlab support" OFF)
 
-option(NS3_TAP "Build with Tap support" OFF)
+option(NS3_TAP "Build with Tap support" ON)
 
-option(NS3_EMU "Build with emulation support" OFF)
+option(NS3_EMU "Build with emulation support" ON)
 
 option(NS3_GNUPLOT "Build with Gnuplot support" OFF)
 
@@ -66,7 +66,7 @@ option(NS3_NETANIM "Build netanim support" OFF)
 
 option(NS3_PTHREAD "Build with pthread support" ON)
 
-option(NS3_REALTIME "Build with realtime support" OFF)
+option(NS3_REALTIME "Build with realtime support" ON)
 
 #option(NS3_STATIC "Build static library" OFF)
 

@@ -412,7 +412,6 @@ macro(process_options)
                 message(FATAL_ERROR LibRT not found)
             else()
                 link_libraries(rt)
-                add_definitions(-DHAVE_RT)
                 set(HAVE_RT TRUE) # for core-config.h
             endif()
         endif()

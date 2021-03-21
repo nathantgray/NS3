@@ -34,9 +34,5 @@ if (${NS3_TAP})
             model/tap-creator.cc
             model/tap-encode-decode.cc
             )
-
-    set_target_properties(tap-creator
-            PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/tap-bridge/
-            )
+    set_runtime_outputdirectory(tap-creator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/tap-bridge/)
 endif()

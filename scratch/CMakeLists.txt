@@ -14,7 +14,7 @@ foreach(scratch_src ${scratches})
 
     if(res LESS 0)
         add_executable(${scratch_name} "${scratch_src}")
-    target_link_libraries(${scratch_name} "${local-ns3-libs}" ${ns3-contrib-libs})
+        set_runtime_outputdirectory(${scratch_name} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/scratch/)
+	    target_link_libraries(${scratch_name} "${local-ns3-libs}" "${ns3-contrib-libs}")
     endif()
 endforeach()
-

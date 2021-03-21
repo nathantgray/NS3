@@ -22,7 +22,7 @@ cwd_offset_dict = { "ns-3-dev"  : len(cwd_components),
 
 cwd_offset = cwd_offset_dict[cwd_components[-1]]
 ns3_path = "/".join(cwd_components[:cwd_offset])
-bin_path = "/".join([ns3_path,"build","bin",""])
+bin_path = "/".join([ns3_path,"build",""])
 utils_path = "/".join([ns3_path,"utils",""])
 
 
@@ -33,7 +33,7 @@ def run_test(test_name):
 	error = None
 	try:
 		os.chdir(bin_path)
-		output = subprocess.check_output([dot_path+runner_name, "--test-name="+test_name], shell=False, stderr=subprocess.DEVNULL)
+		output = subprocess.check_output([dot_path+"utils"+os.sep+runner_name, "--test-name="+test_name], shell=False, stderr=subprocess.DEVNULL)
 	except Exception:
 		error = True
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 		#Fetch test names from test-runner
 		os.chdir(bin_path)
 		try:
-			tmp = subprocess.check_output([dot_path+runner_name, "--list"], shell=False, stderr=None)
+			tmp = subprocess.check_output([dot_path+"utils"+os.sep+runner_name, "--list"], shell=False, stderr=None)
 		except:
 			return -1
 

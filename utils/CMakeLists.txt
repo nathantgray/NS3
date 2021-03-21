@@ -9,22 +9,24 @@ if (${NS3_TESTS})
         add_executable(test-runner test-runner.cc ${local-ns3-libs-tests} $<TARGET_OBJECTS:${libtest}>)
         target_link_libraries(test-runner ${LIB_AS_NEEDED_PRE} ${libraries_to_link}  ${LIB_AS_NEEDED_POST})
     else()
-        add_executable(test-runner test-runner.cc)
+        add_executable(test-runner test-runner.cc $<TARGET_OBJECTS:${libtest}>)
         target_link_libraries(test-runner ${LIB_AS_NEEDED_PRE} ${local-ns3-libs} ${local-ns3-libs-tests} ${LIB_AS_NEEDED_POST})
     endif()
+    set_runtime_outputdirectory(test-runner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/)
 
     add_executable(bench-simulator bench-simulator.cc)
     target_link_libraries(bench-simulator ${libcore})
+    set_runtime_outputdirectory(bench-simulator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/)
 
-    if (${libnetwork})
-        add_executable(bench-packets bench-packets.cc)
-        target_link_libraries(bench-packets ${libnetwork})
-    endif()
+    add_executable(bench-packets bench-packets.cc)
+    target_link_libraries(bench-packets ${libnetwork})
+    set_runtime_outputdirectory(bench-packets ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/)
 
-    if (${libcsma}) # weird test, but whatever
-        add_executable(print-introspected-doxygen print-introspected-doxygen.cc)
-        target_link_libraries(print-introspected-doxygen ${local-ns3-libs})
-    endif()
+
+    add_executable(print-introspected-doxygen print-introspected-doxygen.cc)
+    target_link_libraries(print-introspected-doxygen ${local-ns3-libs})
+    set_runtime_outputdirectory(print-introspected-doxygen ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/)
+
 
 endif()
 

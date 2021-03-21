@@ -91,6 +91,8 @@ ProcessorCount(NumThreads)
 
 
 #Set compiler options and get command to force unused function linkage (useful for libraries)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(LIB_AS_NEEDED_PRE  )
 set(LIB_AS_NEEDED_POST )
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND NOT APPLE)
@@ -99,7 +101,11 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND NOT APPLE)
     set(LIB_AS_NEEDED_POST -Wl,--as-needed   )
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     set(BUILD_SHARED_LIBS TRUE)
-elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC")
+    #Check the number of threads
+    include(ProcessorCount)
+    ProcessorCount(NumThreads)
+
     # using Visual Studio C++
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     set(BUILD_SHARED_LIBS TRUE)
@@ -207,9 +213,7 @@ macro(process_options)
         message(STATUS "Proceeding without clang-format target")
     endif()
 
-
-
-    #Set common include folder
+    #Set common include folder (./build, where we find ns3/core-module.h)
     include_directories(${CMAKE_OUTPUT_DIRECTORY})
     #link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     #link_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -258,36 +262,24 @@ macro(process_options)
     #Process ns3 Openflow module and dependencies
     set(OPENFLOW_REQUIRED_BOOST_LIBRARIES)
 
-    if(${NS3_OPENFLOW})
+    if(${NS3_LIBXML2} OR ${NS3_OPENFLOW})
         #LibXml2
         find_package(LibXml2)
         if(NOT ${LIBXML2_FOUND})
-            if (NOT ${AUTOINSTALL_DEPENDENCIES})
-                message(FATAL_ERROR "LibXML2 is required by Openflow main library but was not found")
-            else()
+            if (${AUTOINSTALL_DEPENDENCIES})
                 #If we don't find installed, install
                 add_package (libxml2)
                 find_package(LibXml2)
             endif()
         endif()
-        link_directories(${LIBXML2_LIBRARY_DIRS})
-        include_directories(${LIBXML2_INCLUDE_DIR})
-        #add_definitions(${LIBXML2_DEFINITIONS})
-
-        set(OPENFLOW_REQUIRED_BOOST_LIBRARIES
-                system
-                signals
-                filesystem
-                static-assert
-                config
-                )
-        include_directories(${PROJECT_SOURCE_DIR}/3rd-party/openflow/include)
-        #if (WIN32)
-        set(OPENFLOW_LIBRARIES openflow)
-        #else()
-        #    set(OPENFLOW_LIBRARIES libopenflow.a)
-        #endif()
-        set(OPENFLOW_FOUND TRUE)
+        find_package(LibXml2)
+        if(NOT ${LIBXML2_FOUND})
+            message(WARNING "LibXML2 was not found. Continuing without it.")
+        else()
+            link_directories(${LIBXML2_LIBRARY_DIRS})
+            include_directories(${LIBXML2_INCLUDE_DIR})
+            #add_definitions(${LIBXML2_DEFINITIONS})
+        endif()
     endif()
 
 
@@ -388,11 +380,7 @@ macro(process_options)
     if(${NS3_GTK2})
         find_package(GTK2)
         if(NOT ${GTK2_FOUND})
-            if (NOT ${AUTOINSTALL_DEPENDENCIES})
-                message(FATAL_ERROR "LibGTK2 ${NOT_FOUND_MSG}")
-            else()
-                #todo
-            endif()
+            message(WARNING "LibGTK2 was not found. Continuing without it.")
         else()
             link_directories(${GTK2_LIBRARY_DIRS})
             include_directories( ${GTK2_INCLUDE_DIRS})
@@ -469,14 +457,13 @@ macro(process_options)
     endif()
 
     if(${NS3_GSL})
-        #message(FATAL_ERROR GSL not found)
-        #If we don't find installed, install
         find_package(GSL)
         if (NOT ${GSL_FOUND})
-            add_package (GSL)
-            find_package(GSL)
+            message(WARNING "GSL was not found. Continuing without it.")
+            set(NS3_GSL OFF)
+        else()
             include_directories(${GSL_INCLUDE_DIRS})
-            set(GSL_LIBRARIES ${GSL_LIBRARIES})
+            link_libraries(${GSL_LIBRARIES})
         endif()
     endif()
 
@@ -564,9 +551,10 @@ macro(process_options)
     endif()
 
     if(${NS3_GNUPLOT})
-        find_package(Gnuplot-ios)
+        find_package(Gnuplot-ios) #Not sure what package would contain the correct header/library
         if(NOT ${GNUPLOT_FOUND})
-            message(FATAL_ERROR GNUPLOT not found)
+            message(WARNING "GNUPLOT was not found. Continuing without it.")
+            set(NS3_GNUPLOT OFF)
         else()
             include_directories(${GNUPLOT_INCLUDE_DIRS})
             link_directories(${GNUPLOT_LIBRARY})
@@ -653,11 +641,13 @@ macro(process_options)
                     COMMAND ${cat_command} ${PROJECT_SOURCE_DIR}/testpy-output/*.command-line > ${PROJECT_SOURCE_DIR}/doc/introspected-command-line.h 2> NULL
                     DEPENDS run-introspected-command-line
                     )
+
             add_custom_target(doxygen
                     COMMAND Doxygen::doxygen ${PROJECT_SOURCE_DIR}/doc/doxygen.conf
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                     DEPENDS run-print-introspected-doxygen assemble-introspected-command-line
             )
+
             if (${SPHINX_FOUND})
                 set(SPHINX_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs/sphinx)
                 add_custom_target(sphinx ALL
@@ -867,25 +857,6 @@ macro (build_lib libname source_files header_files libraries_to_link test_source
         endif()
     endif()
 
-    #Cppyy bindings test
-    if(${GENERATE_BINDINGS})
-        cppyy_add_bindings(
-                "ns.${libname}"
-                "0"
-                "NSNAM"
-                "nsnam@nsnam.org"
-                INCLUDE_DIRS ${CMAKE_OUTPUT_DIRECTORY}
-                LINK_LIBRARIES ${lib${libname}}
-                H_DIRS "${CMAKE_OUTPUT_DIRECTORY};${CMAKE_OUTPUT_DIRECTORY}/ns3;${CMAKE_CURRENT_SOURCE_DIR}"
-                H_FILES  "${header_files}"
-        )
-        GET_PROPERTY(local-ns3-pybindings-headers GLOBAL PROPERTY ns3-pybindings-headers)
-        set_property(GLOBAL PROPERTY ns3-pybindings-headers "${local-ns3-pybindings-headers};${header_files}")
-        GET_PROPERTY(local-ns3-pybindings-headers-dirs GLOBAL PROPERTY ns3-pybindings-headers-dirs)
-        set_property(GLOBAL PROPERTY ns3-pybindings-headers-dirs "${local-ns3-pybindings-headers-dirs};${CMAKE_CURRENT_SOURCE_DIR}")
-        GET_PROPERTY(local-ns3-pybindings-libs GLOBAL PROPERTY ns3-pybindings-libs)
-        set_property(GLOBAL PROPERTY ns3-pybindings-libs "${local-ns3-pybindings-libs};${lib${libname}}")
-    endif()
     #Build pybindings if requested and if bindings subfolder exists in NS3/src/libname
     if(${NS3_PYTHON} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/bindings")
         set(arch gcc_LP64)#ILP32)
@@ -934,7 +905,7 @@ function(set_runtime_outputdirectory target_name output_directory)
             RUNTIME_OUTPUT_DIRECTORY ${output_directory}
             )
     if(${MSVC} OR ${XCODE})
-        #Is that so hard not to break people's CI, MSFT?
+        #Is that so hard not to break people's CI, MSFT and AAPL??
         #Why would you output the targets to a Debug/Release subfolder? Why?
         foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
             string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )

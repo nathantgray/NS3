@@ -39,7 +39,9 @@ option(NS3_BOOST "Build with Boost support" OFF)
 
 option(NS3_OPENFLOW "Build with Openflow support" OFF)
 
-option(NS3_GTK2 "Build with GTK2 support" OFF)
+option(NS3_GTK2 "Build with GTK2 support" ON)
+
+option(NS3_LIBXML2 "Build with LIBXML2 support" ON)
 
 option(NS3_MPI "Build with MPI support" ON)
 

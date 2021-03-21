@@ -9,6 +9,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    outputs:
+      cache_hit_rate: ${{ steps.ccache_results.outputs.ccache_hit_rate }}
     steps:
       - uses: actions/checkout@v1
       - name: Install required packages
@@ -31,8 +33,8 @@ jobs:
         uses: actions/cache@v1.1.0
         with:
           path: .ccache
-          key: ubuntu-${{steps.time.outputs.time}}
-          restore-keys: ubuntu-
+          key: ubuntu-ci-${{steps.time.outputs.time}}
+          restore-keys: ubuntu-ci-
       - name: Setup ccache
         run: |
           ccache --set-config=cache_dir="$GITHUB_WORKSPACE/.ccache"
@@ -49,23 +51,26 @@ jobs:
           cd cmake-cache
           ninja
       - name: Print ccache statistics
+        id: ccache_results
         run: |
-          ccache -s
+          #ccache -s
+          python3 -c "import re; print('::set-output name=cache_hit_rate::'+re.findall('.* (.*) %', '`ccache -s | grep "cache hit rate"`')[0])"
       - name: Run tests and examples
-        if: steps.ccache.outputs.cache-hit != 'true'
+        if: steps.ccache_results.outputs.cache_hit_rate != '100.00'    
         run: python3 test.py --nowaf
 
   Ubuntu-coverage:
 
     runs-on: ubuntu-latest
-
+    outputs:
+        cache_hit_rate: ${{ steps.ccache_results.outputs.ccache_hit_rate }}
     steps:
       - uses: actions/checkout@v1
       - name: Install required packages
         run: |
           sudo apt-get update
           sudo apt-get -y install apt-utils
-          sudo apt-get -y install git gcc g++ cmake python make ninja-build
+          sudo apt-get -y install git gcc g++ cmake python3 make ninja-build
           #sudo apt-get -y install qt5-default
           #sudo apt-get -y install gdb valgrind
           sudo apt-get -y install tcpdump
@@ -100,10 +105,12 @@ jobs:
           cd cmake-cache
           ninja
       - name: Print ccache statistics
+        id: ccache_results
         run: |
-          ccache -s
+          #ccache -s
+          python3 -c "import re; print('::set-output name=cache_hit_rate::'+re.findall('.* (.*) %', '`ccache -s | grep "cache hit rate"`')[0])"
       - name: Generate coverage data and submit to codecov.io
-        if: steps.ccache.outputs.cache-hit != 'true'
+        if: steps.ccache_results.outputs.cache_hit_rate != '100.00'
         run: |
           cd cmake-cache
           ninja coverage_gcc
@@ -139,6 +146,8 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    outputs:
+        cache_hit_rate: ${{ steps.ccache_results.outputs.ccache_hit_rate }}
     steps:
       - uses: actions/checkout@v1
       # Manual setup
@@ -194,16 +203,19 @@ jobs:
           cd cmake-cache
           ninja
       - name: Print ccache statistics
+        id: ccache_results
         run: |
-          ccache -s
+          #ccache -s
+          python -c "import re; print('::set-output name=cache_hit_rate::'+re.findall('.* (.*) %', '`ccache -s | grep "cache hit rate"`')[0])"
       - name: Run tests and examples
-        if: steps.ccache.outputs.cache-hit != 'true'
+        if: steps.ccache_results.outputs.cache_hit_rate != '100.00'    
         run: python test.py --nowaf
 
   Mac_OS_X:
 
     runs-on: macos-latest
-
+    outputs:
+        cache_hit_rate: ${{ steps.ccache_results.outputs.ccache_hit_rate }}
     steps:
       - uses: actions/checkout@v1
       - name: Install required packages
@@ -219,8 +231,8 @@ jobs:
         uses: actions/cache@v1.1.0
         with:
           path: .ccache
-          key: osx_brew-{{steps.time.outputs.time}}
-          restore-keys: osx_brew-
+          key: osx_brew-ci-${{steps.time.outputs.time}}
+          restore-keys: osx_brew-ci-
       - name: Setup ccache
         run: |
           export PATH=/usr/local/bin:$PATH #:/usr/local/opt/qt/bin
@@ -240,12 +252,14 @@ jobs:
         run: |
           export PATH="$PATH" #:/usr/local/opt/qt/bin
           cd cmake-cache
-          ninja
+          ninja        
       - name: Print ccache statistics
+        id: ccache_results
         run: |
-          ccache -s
+          #ccache -s
+          python3 -c "import re; print('::set-output name=cache_hit_rate::'+re.findall('.* (.*) %', '`ccache -s | grep "cache hit rate"`')[0])"
       - name: Run tests and examples
-        if: steps.ccache.outputs.cache-hit != 'true'
+        if: steps.ccache_results.outputs.cache_hit_rate != '100.00'    
         run: python3 test.py --nowaf
     #  - name: Clean release with debug artifacts
     #    run: |

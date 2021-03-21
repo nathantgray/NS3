@@ -178,7 +178,11 @@ macro(process_options)
 
     if(${NS3_TESTS})
         enable_testing()
+        if (${NS3_EXAMPLES})
+            include(buildsupport/custom_modules/ns3_coverage.cmake)
+        endif()
     endif()
+
 
     #Set common include folder
     include_directories(${CMAKE_OUTPUT_DIRECTORY})

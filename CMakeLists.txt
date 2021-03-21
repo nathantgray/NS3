@@ -27,6 +27,8 @@ option(NS3_TESTS "Enable tests to be built" OFF)
 
 option(NS3_EXAMPLES "Enable examples to be built" OFF)
 
+option(NS3_COVERAGE "Enable code coverage measurements and report generation" OFF)
+
 option(NS3_ENABLE_BUILD_VERSION "Embed version info into libraries" OFF)
 
 option(NS3_SANITIZE "Build with sanitizers" OFF)

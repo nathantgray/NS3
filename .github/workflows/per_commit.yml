@@ -186,6 +186,7 @@ jobs:
           ccache -s
           python -c "import re; print('::set-output name=cache_hit_rate::'+re.findall('.* (.*) %', '`ccache -s | grep "cache hit rate"`')[0])"
       - name: Run tests and examples
+        continue-on-error: true
         if: steps.ccache_results.outputs.cache_hit_rate != '100.00'    
         run: python test.py --nowaf
 

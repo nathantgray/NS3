@@ -177,6 +177,8 @@ Here you can choose a better generator like `ninja` by setting the cmake options
 To reload the CMake cache, triggering the copy of new headers and discovery of new targets (libraries, executables and/or modules), you can either configure to re-run CMake automatically after editing CMake files (pretty slow and easily triggered) or reload manually. The following image shows how to trigger the CMake cache reload.
 ![reload_cache](/NS3/img/reload_cache.png)
 
+Timestamp in the video: https://www.youtube.com/watch?v=db4-Zz5M3oA&t=61s
+
 ### 3.3 CMake configuration with Visual Studio
 
 #### 3.3.1 Visual C++ Compilers
@@ -239,7 +241,6 @@ Finally, you can select the CMake configurations for ns-3 and choose targets to 
 ![vs_wsl_setup_cmake_options_and_targets](/NS3/img/vs/vs_wsl_setup_cmake_options_and_targets.png)
 
 
-
 ## 4 Building the project
 After the configuration, you will have multiple targets (for libraries and executables). Again, you can choose either command line tools or IDEs that support CMake projects to build and link those targets.
 
@@ -264,6 +265,12 @@ You can then click on either the play button or use the main Menu->Build->Build 
 
 ![vs_build_project](/NS3/img/vs/vs_build_project.png)
 
+### 4.4 Configuring ns-3 with the command line and building the project with Code::Blocks
+Timestamp in the video: https://youtu.be/db4-Zz5M3oA?t=590s
+
+### 4.5 Configuring ns-3 with the command line and building the project with Xcode
+Timestamp in the video: https://youtu.be/db4-Zz5M3oA?t=1230s
+
 ## 5. Running built executables
 After building executables, they will be placed in NS3/build/bin. To run them, you can either use the command line or your prefered IDE.
 
@@ -282,6 +289,14 @@ cd ../../cmake-cache
 Select the desired target to run from the drop-down list and then click either: the play button to execute the program;
 the bug to debug the program; the play button with a chip, to run Valgrind and analyze memory usage, leaks and so on.
 ![build_targets](/NS3/img/run_target.png)
+
+Timestamp in the video: https://www.youtube.com/watch?v=db4-Zz5M3oA&t=338s
+
+### 5.3 Running executables with Code::Blocks
+https://www.youtube.com/watch?v=db4-Zz5M3oA&t=899s
+
+### 5.4 Running executables with Xcode
+https://www.youtube.com/watch?v=db4-Zz5M3oA&t=1396s
 
 ## 6. Creating a new module
 As [Waf](https://waf.io/) (the official buildsystem) was replaced with CMake, the required steps to create a new module for the ns-3 change slightly.

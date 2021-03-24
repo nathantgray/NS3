@@ -69,7 +69,7 @@ In case of trouble, look at the [WSL official installation page](https://docs.mi
 
 ##### 1.2.2.3 Setting up WSL for development
 
-I usually use Jetbrains CLion, and they wrote [instructions](https://www.jetbrains.com/help/clion/how-to-use-wsl-development-environment-in-product.html) and a [litte script that setups everything automagically](https://raw.githubusercontent.com/JetBrains/clion-wsl/master/ubuntu_setup_env.sh && bash ubuntu_setup_env.sh).
+I usually use Jetbrains CLion, and they wrote [instructions](https://www.jetbrains.com/help/clion/how-to-use-wsl-development-environment-in-product.html) and a [litte script that setups everything automagically](https://raw.githubusercontent.com/JetBrains/clion-wsl/master/ubuntu_setup_env.sh).
 
 Just configure CLion to use WSL and enter your SSH port (2222 in their script), username and password.
 
@@ -194,7 +194,7 @@ look for advanced settings and select the appropriate clangcl toolchain. It won'
 
 Visual Studio should regenerate the caches after that.
 
-##### 3.3.2 Linux Development (WSL)
+#### 3.3.2 Linux Development (WSL)
 If you want to use this feature, make sure to enable the Linux development feature during Visual Studio installation.
 ![wsl_visual_studio](/NS3/img/vs/wsl_visual_studio.png)
 
@@ -213,18 +213,28 @@ When you're done and close the credentials window, the connection will be listed
 After that, click the `add a new configuration` button, to add the WSL as a Visual Studio target.
 ![vs_wsl_setup_configuration](/NS3/img/vs/vs_wsl_setup_configuration.png)
 
+###### 3.3.2.1 WSL mode
 You can choose GCC or Clang compilers, and to use Debug, Release with debug info or a pre-existing cache (e.g. configured with the command line/prompt).
 ![vs_wsl_setup_configuration_buildtype](/NS3/img/vs/vs_wsl_setup_configuration_buildtype.png)
+
+After confirming, you will be able to select your newly created configuration as a target. At this point a yellow banner should pop up on the top offering to install a customized CMake that supports the WSL/Visual Studio interaction.
+![vs_wsl_setup_configuration_select_config](/NS3/img/vs/vs_wsl_setup_configuration_select_config.png)
+
+
+###### 3.3.2.2 Remote Linux mode
+You can choose GCC or Clang compilers, and to use Debug, Release with debug info or a pre-existing cache (e.g. configured with the command line/prompt).
+![vs_wsl_setup_configuration_buildtype](/NS3/img/vs/vs_wsl_setup_configuration_remote_buildtype.png)
 
 After confirming, you will be able to select your newly created configuration as a target.
 ![vs_wsl_setup_configuration_select_config](/NS3/img/vs/vs_wsl_setup_configuration_select_config.png)
 
-Visual Studio will start syncing the local development folder with the remote server (in this case WSL).
-It will take a while.
-![vs_wsl_setup_configuration_syncing](/NS3/img/vs/vs_wsl_setup_configuration_syncing.png)
+Visual Studio will start syncing the local development folder with the remote server (in this case WSL). It will take a while.
+![vs_wsl_setup_configuration_syncing](/NS3/img/vs/vs_wsl_setup_configuration_remote_syncing.png)
+
+##### 3.3.2.3 Target selection and ns-3 configuration through CMake options
 
 Finally, you can select the CMake configurations for ns-3 and choose targets to build/debug, just like with native toolchains.
-![vs_wsl_setup_cmake_options_and_targets](/NS3/img/vs/vs_wsl_setup_cmake_options_and_targetsg.png)
+![vs_wsl_setup_cmake_options_and_targets](/NS3/img/vs/vs_wsl_setup_cmake_options_and_targets.png)
 
 
 

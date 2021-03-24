@@ -177,7 +177,7 @@ Here you can choose a better generator like `ninja` by setting the cmake options
 To reload the CMake cache, triggering the copy of new headers and discovery of new targets (libraries, executables and/or modules), you can either configure to re-run CMake automatically after editing CMake files (pretty slow and easily triggered) or reload manually. The following image shows how to trigger the CMake cache reload.
 ![reload_cache](/NS3/img/reload_cache.png)
 
-Timestamp in the video: https://www.youtube.com/watch?v=db4-Zz5M3oA&t=61s
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA?start=61" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### 3.3 CMake configuration with Visual Studio
 
@@ -266,10 +266,10 @@ You can then click on either the play button or use the main Menu->Build->Build 
 ![vs_build_project](/NS3/img/vs/vs_build_project.png)
 
 ### 4.4 Configuring ns-3 with the command line and building the project with Code::Blocks
-Timestamp in the video: https://youtu.be/db4-Zz5M3oA?t=590s
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA?start=590" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### 4.5 Configuring ns-3 with the command line and building the project with Xcode
-Timestamp in the video: https://youtu.be/db4-Zz5M3oA?t=1230s
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA?start=1230" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## 5. Running built executables
 After building executables, they will be placed in NS3/build/bin. To run them, you can either use the command line or your prefered IDE.
@@ -290,13 +290,13 @@ Select the desired target to run from the drop-down list and then click either: 
 the bug to debug the program; the play button with a chip, to run Valgrind and analyze memory usage, leaks and so on.
 ![build_targets](/NS3/img/run_target.png)
 
-Timestamp in the video: https://www.youtube.com/watch?v=db4-Zz5M3oA&t=338s
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA?start=338" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### 5.3 Running executables with Code::Blocks
-https://www.youtube.com/watch?v=db4-Zz5M3oA&t=899s
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA?start=899" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### 5.4 Running executables with Xcode
-https://www.youtube.com/watch?v=db4-Zz5M3oA&t=1396s
+<iframe width="560" height="315" src="https://www.youtube.com/embed/db4-Zz5M3oA?start=1396" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## 6. Creating a new module
 As [Waf](https://waf.io/) (the official buildsystem) was replaced with CMake, the required steps to create a new module for the ns-3 change slightly.

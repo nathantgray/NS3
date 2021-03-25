@@ -126,7 +126,6 @@ set(header_files
         utils/net-device-queue-interface.h
         utils/radiotap-header.h
         utils/sequence-number.h
-        utils/sgi-hashmap.h
         utils/simple-channel.h
         utils/simple-net-device.h
         utils/sll-header.h

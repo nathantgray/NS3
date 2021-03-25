@@ -26,6 +26,8 @@ Before proceeding you will need:
     
 Those are basic pre-requisites for both ns-3 and VcPkg, used in this version of ns-3 for dependencies installation. The [official ns-3 branch](https://gitlab.com/nsnam/ns-3-dev/) uses Bake for dependencies installation.
 
+For package-manager commands used to install these packages, look at `Install required packages` entries in the [CI file](https://github.com/Gabrielcarvfer/NS3/blob/master/.github/workflows/per_commit.yml).
+
 ### 1.2 Configure the environment
 
 #### 1.2.1 Msys2
@@ -73,7 +75,7 @@ I usually use Jetbrains CLion, and they wrote [instructions](https://www.jetbrai
 
 Just configure CLion to use WSL and enter your SSH port (2222 in their script), username and password.
 
-If you're interest in GUI applications running inside WSL (e.g. NetAnim), you can install a X11 server on Windows (e.g. [VcxSrv](https://sourceforge.net/projects/vcxsrv/files/latest/download)) and redirect your WSL applications to it.
+If you're interested in GUI applications running inside WSL (e.g. NetAnim), you can install a X11 server on Windows (e.g. [VcxSrv](https://sourceforge.net/projects/vcxsrv/files/latest/download)) and redirect your WSL applications to it.
 
 To redirect GUI application to the X11 server on Windows, add the following to the last line of `~/.bashrc`:
 - For WSLv1: `DISPLAY=:0`

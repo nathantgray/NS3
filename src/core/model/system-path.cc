@@ -43,10 +43,6 @@
 #if defined (HAVE_SYS_STAT_H) and defined (HAVE_SYS_TYPES_H)
     /** Do we have a \c makedir function? */
     #define HAVE_MKDIR_H
-    #ifdef __WIN32__
-        #define WIN32_LEAN_AND_MEAN
-        #include <windows.h>
-    #endif
     #include <sys/types.h>
     #include <sys/stat.h>
 #endif
@@ -66,6 +62,10 @@
 
 #ifdef __linux__
 #include <unistd.h>
+#endif
+
+#if __WIN32__
+#include <windows.h>
 #endif
 
 /**

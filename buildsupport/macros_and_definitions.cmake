@@ -102,6 +102,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND NOT APPLE)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     set(BUILD_SHARED_LIBS TRUE)
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC")
+    set(CMAKE_CXX_STANDARD 17) # filesystem
+
     #Check the number of threads
     include(ProcessorCount)
     ProcessorCount(NumThreads)
@@ -110,6 +112,26 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" OR "${CMAKE_CXX_SIMULATE_ID}" 
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     set(BUILD_SHARED_LIBS TRUE)
     set(CMAKE_MSVC_PARALLEL ${NumThreads})
+
+    # MSVC needs an explicit flag to enable exceptions support
+    # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model?redirectedfrom=MSDN&view=vs-2019
+    add_definitions(/EHs)
+
+    # Suppress warnings
+    #add_definitions(/W0)
+
+    # /Gy forces object functions to be made into a COMDAT(???), preventing removal by the linker
+    add_definitions(/Gy)
+
+    # For whatever reason getting M_PI and other math.h definitions from cmath requires this definition
+    # https://docs.microsoft.com/en-us/cpp/c-runtime-library/math-constants?view=vs-2019
+    add_definitions(/D_USE_MATH_DEFINES)
+
+    # Boring warnings about standard functions being unsecure (as if their version was...)
+    add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+
+    # Prevent windows.h from defining a ton of additional crap
+    add_definitions(/DNOMINMAX /DWIN32_LEAN_AND_MEAN)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" AND APPLE)
@@ -190,8 +212,8 @@ macro(process_options)
     endif()
 
     find_program(CLANG_TIDY clang-tidy)
-    if (CLANG_TIDY)
-        set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-*,readability-*")
+    if (CLANG_TIDY AND NOT ${MSVC})
+        set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=clang-analyzer-*,bugprone-*,cppcoreguidelines-*,portability-*")
     else()
         message(STATUS "Proceeding without clang-tidy static analysis")
     endif()
@@ -343,9 +365,6 @@ macro(process_options)
         set(CMAKE_CXX_STANDARD 11) #c++17 for inline variables in Windows
         set(CMAKE_CXX_STANDARD_REQUIRED OFF) #ABI requirements for PyTorch affect this
         add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0 -Dtorch_EXPORTS -DC10_BUILD_SHARED_LIBS -DNS3_PYTORCH)
-    else()
-        set(CMAKE_CXX_STANDARD 11) #c++17 for inline variables in Windows
-        set(CMAKE_CXX_STANDARD_REQUIRED ON)
     endif()
 
     if(${NS3_SANITIZE})
@@ -394,6 +413,7 @@ macro(process_options)
     if(${NS3_REALTIME})
         if(WIN32 OR APPLE)
             message(WARNING "Lib RT is not supported on Windows/Mac OS X, building without it")
+            set(NS3_REALTIME OFF)
         else()
             find_library(LIBRT rt)
             if(NOT ${LIBRT_FOUND})
@@ -414,7 +434,7 @@ macro(process_options)
         else()
             include_directories(${THREADS_PTHREADS_INCLUDE_DIR})
             set(THREADS_FOUND TRUE)
-            if(${CMAKE_USE_WIN32_THREADS_INIT})
+            if(${MSVC})
             else()
                 set(HAVE_PTHREAD_H TRUE) # for core-config.h
             endif()

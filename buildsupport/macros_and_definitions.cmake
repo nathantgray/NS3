@@ -130,6 +130,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" OR "${CMAKE_CXX_SIMULATE_ID}" 
     # Boring warnings about standard functions being unsecure (as if their version was...)
     add_definitions(/D_CRT_SECURE_NO_WARNINGS)
 
+    # Set RUNNING_ON_VALGRIND to false to make int64x64 test suite happy
+    add_definitions(/DRUNNING_ON_VALGRIND=false)
+
     # Prevent windows.h from defining a ton of additional crap
     add_definitions(/DNOMINMAX /DWIN32_LEAN_AND_MEAN)
 endif()

@@ -61,6 +61,7 @@ elseif(INT64X64 STREQUAL "DOUBLE")
             model/int64x64-double.h
             )
 elseif(INT64X64 STREQUAL "CAIRO")
+    add_library(cairo STATIC model/cairo-wideint-private.h model/cairo-wideint.c)
     set(int64x64_sources
             model/int64x64-cairo.cc
             )
@@ -68,8 +69,16 @@ elseif(INT64X64 STREQUAL "CAIRO")
             model/int64x64-cairo.h
             model/cairo-wideint-private.h
             )
+    set(libraries_to_link
+            cairo
+            ${libraries_to_link}
+            )
 endif()
 
+
+set(valgrind_headers
+        model/valgrind.h
+	)
 
 set(thread_sources)
 set(thread_headers)
@@ -103,13 +112,27 @@ if (${NS3_PTHREAD})
 			set(thread_headers
 					model/unix-fd-reader.h
 					)
+			set(libraries_to_link
+					${libraries_to_link}
+					pthread
+					)
 		endif()
-		set(thread_sources
-				${thread_sources}
-				model/system-thread.cc
-				model/unix-system-mutex.cc
-				model/unix-system-condition.cc
-				)
+
+		if(MSVC)
+			set(thread_sources
+					${thread_sources}
+					model/cpp-system-thread.cc
+					model/cpp-system-mutex.cc
+					model/cpp-system-condition.cc
+					)
+		else()
+			set(thread_sources
+					${thread_sources}
+					model/system-thread.cc
+					model/unix-system-mutex.cc
+					model/unix-system-condition.cc
+					)
+		endif()
 
 		set(thread_headers
 				${thread_headers}
@@ -117,11 +140,6 @@ if (${NS3_PTHREAD})
 				model/system-thread.h
 				model/system-condition.h
 				)
-
-		set(libraries_to_link
-			${libraries_to_link}
-			pthread
-			)
 
 		set(thread_test_sources
 				test/threaded-test-suite.cc
@@ -156,15 +174,16 @@ set(source_files
         ${osclock_sources}
         ${int64x64_sources}
         ${thread_sources}
-		${valgrind_sources}
-		model/time.cc
+	    ${valgrind_sources}
+	    ${examples_as_tests_sources}
+	    model/time.cc
         model/event-id.cc
         model/scheduler.cc
         model/list-scheduler.cc
         model/map-scheduler.cc
         model/heap-scheduler.cc
         model/calendar-scheduler.cc
-		model/priority-queue-scheduler.cc
+	    model/priority-queue-scheduler.cc
         model/event-impl.cc
         model/simulator.cc
         model/simulator-impl.cc
@@ -212,15 +231,14 @@ set(source_files
         model/hash-fnv.cc
         model/hash.cc
         model/des-metrics.cc
-		model/ascii-file.cc
+	    model/ascii-file.cc
         model/node-printer.cc
         model/show-progress.cc
         model/time-printer.cc
-		model/system-wall-clock-timestamp.cc
-		model/length.cc
-		model/trickle-timer.cc
-		helper/csv-reader.cc
-		${examples_as_tests_sources}
+	    model/system-wall-clock-timestamp.cc
+	    model/length.cc
+	    model/trickle-timer.cc
+	    helper/csv-reader.cc
         )
 
 #Define core lib headers
@@ -228,8 +246,7 @@ set (header_files
         ${rt_headers}
         ${int64x64_headers}
         ${thread_headers}
-		${examples_as_tests_headers}
-		model/valgrind.h
+        ${examples_as_tests_headers}
         model/nstime.h
         model/event-id.h
         model/event-impl.h
@@ -241,7 +258,7 @@ set (header_files
         model/map-scheduler.h
         model/heap-scheduler.h
         model/calendar-scheduler.h
-		model/priority-queue-scheduler.h
+        model/priority-queue-scheduler.h
         model/simulation-singleton.h
         model/singleton.h
         model/timer.h
@@ -250,7 +267,7 @@ set (header_files
         model/synchronizer.h
         model/make-event.h
         model/system-wall-clock-ms.h
-		model/system-wall-clock-timestamp.h
+	    model/system-wall-clock-timestamp.h
         model/empty.h
         model/callback.h
         model/object-base.h
@@ -276,8 +293,8 @@ set (header_files
         model/int-to-type.h
         model/attribute.h
         model/attribute-accessor-helper.h
-		model/attribute-container.h
-		model/attribute-container-accessor-helper.h
+	    model/attribute-container.h
+	    model/attribute-container-accessor-helper.h
         model/boolean.h
         model/int64x64.h
         model/int64x64-double.h
@@ -328,6 +345,9 @@ set (header_files
         )
 
 set(test_sources
+		${examples_as_tests_test_sources}
+		${gsl_test_sources}
+		${thread_test_sources}
         test/attribute-test-suite.cc
         test/attribute-container-test-suite.cc
         test/build-profile-test-suite.cc
@@ -354,9 +374,6 @@ set(test_sources
         test/type-id-test-suite.cc
 		test/length-test-suite.cc
 		test/trickle-timer-test-suite.cc
-		${examples_as_tests_test_sources}
-        ${gsl_test_sources}
-		${thread_test_sources}
         )
 
 #Build core lib

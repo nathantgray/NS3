@@ -43,7 +43,7 @@ NS_LOG_COMPONENT_DEFINE ("Icmpv6L4Protocol");
 
 NS_OBJECT_ENSURE_REGISTERED (Icmpv6L4Protocol);
 
-const uint8_t Icmpv6L4Protocol::PROT_NUMBER = 58;
+const uint8_t Icmpv6L4Protocol::PROT_NUMBER;
 
 //const uint8_t Icmpv6L4Protocol::MAX_INITIAL_RTR_ADVERT_INTERVAL = 16; // max initial RA initial interval.
 //const uint8_t Icmpv6L4Protocol::MAX_INITIAL_RTR_ADVERTISEMENTS = 3;   // max initial RA transmission.

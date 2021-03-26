@@ -26,16 +26,8 @@
 
 namespace ns3 {
 
-#ifndef _MSC_VER
-extern Ptr<SpectrumModel> SpectrumModelIsm2400MhzRes1Mhz;
-#else
-static Ptr<SpectrumModel> SpectrumModelIsm2400MhzRes1Mhz = 0;
-#endif
+Ptr<SpectrumModel> SpectrumModelIsm2400MhzRes1Mhz();
 
 }
-
-
-
-
 
 #endif /* FREQS_ISM2400MHZ_RES1MHZ_H */

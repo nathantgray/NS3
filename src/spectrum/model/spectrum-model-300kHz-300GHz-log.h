@@ -26,16 +26,8 @@
 
 namespace ns3 {
 
-#ifndef _MSC_VER
-    extern Ptr<SpectrumModel> SpectrumModel300Khz300GhzLog;
-#else
-    static Ptr<SpectrumModel> SpectrumModel300Khz300GhzLog = 0;
-#endif
-
+Ptr<SpectrumModel> SpectrumModel300Khz300GhzLog();
 
 }
-
-
-
 
 #endif /*  FREQS_300KHZ_300GHZ_LOG_H */

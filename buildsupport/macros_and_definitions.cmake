@@ -113,6 +113,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" OR "${CMAKE_CXX_SIMULATE_ID}" 
     set(BUILD_SHARED_LIBS TRUE)
     set(CMAKE_MSVC_PARALLEL ${NumThreads})
 
+    # Force clang to keep static consts, but can also cause weird linking issues
+    # https://reviews.llvm.org/D53457
+    #add_definitions(/clang:-fkeep-static-consts)
+
     # MSVC needs an explicit flag to enable exceptions support
     # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model?redirectedfrom=MSDN&view=vs-2019
     add_definitions(/EHs)

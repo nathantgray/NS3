@@ -670,7 +670,7 @@ private:
 #ifdef _MSC_VER
   inline static MarkedTimes * g_markingTimes = {}; //requires c++17
 #else
-static MarkedTimes * g_markingTimes;
+  static MarkedTimes * g_markingTimes;
 #endif
 public:
   /**

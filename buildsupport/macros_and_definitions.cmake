@@ -730,7 +730,6 @@ macro(process_options)
     #Remove from libs_to_build all incompatible libraries or the ones that dependencies couldn't be installed
     if(${MSVC})
         set(NS3_NETANIM OFF)
-        list(REMOVE_ITEM libs_to_build netanim)
     endif()
 
     if(NOT ${NS3_OPENFLOW})

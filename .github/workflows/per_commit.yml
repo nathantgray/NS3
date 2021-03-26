@@ -263,6 +263,7 @@ jobs:
           cd cmake-cache
           cmake -DCMAKE_BUILD_TYPE=minsizerel -DNS3_EXAMPLES=ON -DNS3_TESTS=ON -G"Visual Studio 16 2019" -A x64 -T ClangCL ..
       - name: Build ns-3
+        continue-on-error: true
         run: |
           %comspec% /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
           cd cmake-cache

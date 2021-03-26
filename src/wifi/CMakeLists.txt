@@ -274,8 +274,12 @@ set(libraries_to_link
         ${libantenna}
         ${libmobility})
 
-
+if(NOT ${MSVC})
+    set(MSVC_INCOMPATIBLE_TEST
+            test/wifi-aggregation-test.cc) # the use of WifiMacQueue::EMPTY prevents this from linking (?)
+endif()
 set(test_sources
+        ${MSVC_INCOMPATIBLE_TEST}
         test/block-ack-test-suite.cc
         test/channel-access-manager-test.cc
         test/tx-duration-test.cc
@@ -283,7 +287,6 @@ set(test_sources
         test/wifi-test.cc
         test/wifi-txop.cc
         test/spectrum-wifi-phy-test.cc
-        test/wifi-aggregation-test.cc
         test/wifi-error-rate-models-test.cc
         test/wifi-transmit-mask-test.cc
         test/wifi-phy-thresholds-test.cc

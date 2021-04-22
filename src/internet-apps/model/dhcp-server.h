@@ -32,8 +32,10 @@
 
 namespace ns3 {
 
+class InetSocketAddress;
 class Socket;
 class Packet;
+class InetSocketAddress;
 
 /**
  * \ingroup dhcp

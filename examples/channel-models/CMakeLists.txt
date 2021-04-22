@@ -1,0 +1,10 @@
+set(examples_to_run)
+exemples_to_run_extract_arguments(examples_to_run)
+# message(WARNING "${examples_to_run}")
+
+set(name three-gpp-v2v-channel-example)
+set(source_files ${name}.cc)
+set(header_files)
+set(libraries_to_link ${libcore} ${libmobility} ${libpropagation} ${libspectrum} ${libantenna} ${libbuildings})
+examples_to_run_find_examples(${name} "${examples_to_run}" examples)
+build_example("${name}" "${source_files}" "${header_files}" "${libraries_to_link}")

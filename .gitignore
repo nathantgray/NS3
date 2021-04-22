@@ -38,3 +38,14 @@ build/
 /.project
 
 version.cache
+
+.idea/
+configFile.cmake
+cmake-build-debug/
+cmake-build-minsizerel/
+cmake-build-relwithdebinfo/
+cmake-build-release/
+cmake_cache/
+utils/failed_tests.json
+3rd-party/
+buildsupport/vcpkg/

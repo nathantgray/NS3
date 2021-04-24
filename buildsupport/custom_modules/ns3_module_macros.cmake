@@ -98,8 +98,7 @@ macro(
     list(LENGTH test_sources test_source_len)
     if(${test_source_len} GREATER 0)
       # Create libname of output library test of module
-      set(test${libname}
-          ns${NS3_VER}-${libname}-test-${build_type}
+      set(test${libname} test-lib${libname}
           CACHE INTERNAL "" FORCE
       )
 
@@ -110,6 +109,7 @@ macro(
         # Create shared library containing tests of the module
         add_library(${test${libname}} OBJECT "${test_sources}")
 
+        # Append external libraries to a list that will be linked against test-runner
         get_property(local-ns3-libs-tests-external GLOBAL PROPERTY ns3-libs-tests-external)
         set_property(GLOBAL PROPERTY ns3-libs-tests-external "${local-ns3-libs-tests-external};${non_ns_libraries_to_link}")
       else()
@@ -122,6 +122,7 @@ macro(
         target_link_libraries(
           ${test${libname}} ${LIB_AS_NEEDED_PRE} ${lib${libname}} "${libraries_to_link}" ${LIB_AS_NEEDED_POST}
         )
+        set_target_properties(${test${libname}} PROPERTIES OUTPUT_NAME ns${NS3_VER}-${libname}-test-${build_type})
       endif()
 
       target_compile_definitions(${test${libname}} PRIVATE NS_TEST_SOURCEDIR="${folder}/${libname}/test")

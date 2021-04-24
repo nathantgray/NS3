@@ -1,3 +1,5 @@
+link_libraries(click_dep)
+
 set(name nsclick-simple-lan)
 set(source_files ${name}.cc)
 set(header_files)

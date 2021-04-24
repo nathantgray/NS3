@@ -25,4 +25,4 @@ set(test_sources ${example_as_test_suite})
 
 build_lib("${name}" "${source_files}" "${header_files}" "${libraries_to_link}" "${test_sources}")
 
-target_include_directories(${libmpi-obj} PUBLIC ${MPI_CXX_INCLUDE_PATH})
+target_include_directories(${libmpi-obj} PUBLIC ${MPI_CXX_INCLUDE_DIRS})

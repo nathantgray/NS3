@@ -26,7 +26,7 @@ add_library(click_dep SHARED click_glue.cc)
 
 # make sure libclick is only built after nsclick has been built by the click step
 add_dependencies(click_dep click)
-target_link_libraries(click_dep PRIVATE nsclick)
+target_link_libraries(click_dep PUBLIC nsclick)
 set_target_properties(click_dep PROPERTIES OUTPUT_NAME ns${NS3_VER}-click_dep-${build_type})
 
 install(

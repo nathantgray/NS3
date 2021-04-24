@@ -65,6 +65,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY})
 set(CMAKE_HEADER_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/ns3)
 set(THIRD_PARTY_DIRECTORY ${PROJECT_SOURCE_DIR}/3rd-party)
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+link_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Get installation folder default values for each platform and include package configuration macro
 include(GNUInstallDirs)

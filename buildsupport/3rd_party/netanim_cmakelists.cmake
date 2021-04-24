@@ -23,16 +23,7 @@ find_package(
 )
 
 if((NOT ${Qt4_FOUND}) AND (NOT ${Qt5_FOUND}))
-  message(
-    FATAL_ERROR
-      You
-      need
-      Qt
-      installed
-      to
-      build
-      NetAnim
-  )
+  message(FATAL_ERROR "You need Qt installed to build NetAnim")
 endif()
 
 # Qt 4 requires these inclusions

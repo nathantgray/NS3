@@ -65,8 +65,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY})
 set(CMAKE_HEADER_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/ns3)
 set(THIRD_PARTY_DIRECTORY ${PROJECT_SOURCE_DIR}/3rd-party)
-link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-link_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Get installation folder default values for each platform and include package configuration macro
 include(GNUInstallDirs)
@@ -253,14 +251,26 @@ macro(process_options)
     unset(ALL_CMAKE_FILES)
   endif()
 
-  # Set common include folder (./build, where we find ns3/core-module.h)
-  include_directories(${CMAKE_OUTPUT_DIRECTORY})
-  include_directories(${CMAKE_OUTPUT_DIRECTORY}/include)
+  if(${NS3_SANITIZE})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,leak,thread,undefined,memory -g")
+  endif()
 
-  # Add a hunter-like interface to Vcpkg
-  if(${AUTOINSTALL_DEPENDENCIES})
-    setup_vcpkg()
-    include("${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
+  if(${NS3_LINK_WHAT_YOU_USE})
+    set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+  else()
+    set(CMAKE_LINK_WHAT_YOU_USE FALSE)
+  endif()
+
+  if(${NS3_INCLUDE_WHAT_YOU_USE})
+    # beware, it can throw errors for not finding stdc++ headers you may either need to include the system headers path
+    # with -I or install clang https://github.com/include-what-you-use/include-what-you-use/issues/679
+    find_program(INCLUDE_WHAT_YOU_USE_PROG iwyu)
+    if(NOT INCLUDE_WHAT_YOU_USE_PROG)
+      message(FATAL_ERROR "iwyu (include-what-you-use) was not found.")
+    endif()
+    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${INCLUDE_WHAT_YOU_USE_PROG}) # ;--transitive_includes_only)
+  else()
+    unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
   endif()
 
   # PyTorch still need some fixes on Windows
@@ -338,9 +348,9 @@ macro(process_options)
     set_property(TARGET torch PROPERTY INTERFACE_COMPILE_OPTIONS)
   endif()
 
-  if(${NS3_SANITIZE})
-    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,leak,thread,undefined,memory -g")
-  endif()
+  # Set common include folder (./build, where we find ns3/core-module.h)
+  include_directories(${CMAKE_OUTPUT_DIRECTORY})
+  include_directories(${CMAKE_OUTPUT_DIRECTORY}/include)
 
   # find required dependencies
   list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/buildsupport/custom_modules")
@@ -360,13 +370,14 @@ macro(process_options)
   if(${NS3_STATIC})
     # This block should either find static versions of libxml2, librt and others or just make sure the dynamic versions
     # don't get used
-    set(NS3_REALTIME FALSE)
+    set(ENABLE_REALTIME FALSE)
     set(HAVE_RT FALSE)
 
     # Didn't extensively test these, so I'm disabling them by default
     if(${NS3_BRITE}
        OR ${NS3_CLICK}
        OR ${NS3_OPENFLOW}
+       OR ${NS3_MPI}
     )
       message(FATAL_ERROR "Statically linking 3rd party libraries have not been tested."
                           " We are crashing your script to make sure you are aware of that."
@@ -387,9 +398,10 @@ macro(process_options)
       else()
         find_library(LIBRT rt QUIET)
         if(NOT ${LIBRT_FOUND})
-          message(FATAL_ERROR LibRT was not found)
+          message(FATAL_ERROR "LibRT was not found")
+          set(ENABLE_REALTIME FALSE)
         else()
-          link_libraries(rt)
+          set(ENABLE_REALTIME TRUE)
           set(HAVE_RT TRUE) # for core-config.h
         endif()
       endif()
@@ -429,16 +441,14 @@ macro(process_options)
   # Process config-store-config
   configure_file(buildsupport/config-store-config-template.h ${CMAKE_HEADER_OUTPUT_DIRECTORY}/config-store-config.h)
 
+  set(ENABLE_MPI FALSE)
   if(${NS3_MPI})
     find_package(MPI)
     if(NOT ${MPI_FOUND})
       message(WARNING "MPI was not found. Continuing without it.")
-      set(NS3_MPI OFF)
     else()
-      include_directories(${MPI_CXX_INCLUDE_PATH})
-      add_definitions(${MPI_CXX_COMPILE_FLAGS} ${MPI_CXX_LINK_FLAGS} -DNS3_MPI)
-      link_libraries(${MPI_CXX_LIBRARIES})
-      # set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+      add_definitions(-DNS3_MPI)
+      set(ENABLE_MPI TRUE)
     endif()
   endif()
 
@@ -446,10 +456,6 @@ macro(process_options)
     find_package(GSL QUIET)
     if(NOT ${GSL_FOUND})
       message(WARNING "GSL was not found. Continuing without it.")
-      set(NS3_GSL OFF)
-    else()
-      include_directories(${GSL_INCLUDE_DIRS})
-      link_libraries(${GSL_LIBRARIES})
     endif()
   endif()
 
@@ -457,7 +463,6 @@ macro(process_options)
     find_package(Gnuplot-ios) # Not sure what package would contain the correct header/library
     if(NOT ${GNUPLOT_FOUND})
       message(WARNING "GNUPLOT was not found. Continuing without it.")
-      set(NS3_GNUPLOT OFF)
     else()
       include_directories(${GNUPLOT_INCLUDE_DIRS})
       link_directories(${GNUPLOT_LIBRARY})
@@ -610,12 +615,6 @@ CommandLine configuration in those files instead.
 
   configure_file(buildsupport/core-config-template.h ${CMAKE_HEADER_OUTPUT_DIRECTORY}/core-config.h)
 
-  # Disable NS3_EMU if netpacket isn't present
-  if(NOT ${HAVE_PACKETH})
-    message(WARNING "netpacket/packet.h not found. Building without EMU support.")
-    set(NS3_EMU OFF)
-  endif()
-
   # Enable NS3 logging if requested
   if(${NS3_LOG})
     add_definitions(-DNS3_LOG_ENABLE)
@@ -628,7 +627,7 @@ CommandLine configuration in those files instead.
   # Enable examples as tests suites
   if(${NS3_EXAMPLES})
     set(NS3_ENABLE_EXAMPLES "1")
-    add_definitions(-DNS3_ENABLE_EXAMPLES)
+    add_definitions(-DNS3_ENABLE_EXAMPLES -DCMAKE_EXAMPLE_AS_TEST)
   endif()
 
   set(PLATFORM_UNSUPPORTED_PRE "Platform doesn't support")
@@ -649,22 +648,31 @@ CommandLine configuration in those files instead.
     message(WARNING "${PLATFORM_UNSUPPORTED_PRE} BRITE and CLICK ${PLATFORM_UNSUPPORTED_POST}")
   endif()
 
-  if(NOT ${NS3_PYTHON_BINDINGS})
-    list(REMOVE_ITEM libs_to_build visualizer)
+  if(NOT ${NS3_BRITE})
+    list(REMOVE_ITEM libs_to_build brite)
+  endif()
+
+  if(NOT ${NS3_CLICK})
+    list(REMOVE_ITEM libs_to_build click)
+  endif()
+
+  if(NOT ${ENABLE_MPI})
+    list(REMOVE_ITEM libs_to_build mpi)
   endif()
 
   if(NOT ${NS3_OPENFLOW})
     list(REMOVE_ITEM libs_to_build openflow)
   endif()
 
-  if(NOT ${NS3_MPI})
-    list(REMOVE_ITEM libs_to_build mpi)
+  if(NOT ${NS3_PYTHON_BINDINGS})
+    list(REMOVE_ITEM libs_to_build visualizer)
   endif()
 
   if(NOT ${NS3_TAP})
     list(REMOVE_ITEM libs_to_build tap-bridge)
   endif()
 
+  # Fetch 3rd-party libraries
   if(${NS3_CLICK})
     include(FetchContent)
     FetchContent_Declare(
@@ -678,16 +686,6 @@ CommandLine configuration in those files instead.
     file(COPY buildsupport/3rd_party/click_glue.cc DESTINATION ${click_SOURCE_DIR})
     add_subdirectory(${click_SOURCE_DIR})
     add_definitions(-DNS3_CLICK)
-  else()
-    list(REMOVE_ITEM libs_to_build click)
-  endif()
-
-  if(NOT ${NS3_TAP})
-    list(REMOVE_ITEM libs_to_build tap-bridge)
-  endif()
-
-  if(NOT ${NS3_EMU})
-    list(REMOVE_ITEM libs_to_build fd-net-device)
   endif()
 
   if(${NS3_BRITE})
@@ -702,8 +700,6 @@ CommandLine configuration in those files instead.
     file(RENAME ${brite_SOURCE_DIR}/brite_cmakelists.cmake ${brite_SOURCE_DIR}/CMakeLists.txt)
     add_subdirectory(${brite_SOURCE_DIR})
     add_definitions(-DENABLE_BRITE)
-  else()
-    list(REMOVE_ITEM libs_to_build brite)
   endif()
 
   if(${NS3_OPENFLOW})
@@ -718,12 +714,11 @@ CommandLine configuration in those files instead.
     file(RENAME ${openflow_SOURCE_DIR}/openflow_cmakelists.cmake ${openflow_SOURCE_DIR}/CMakeLists.txt)
     add_subdirectory(${openflow_SOURCE_DIR})
     add_definitions(-DNS3_OPENFLOW -DENABLE_OPENFLOW)
-  else()
-    list(REMOVE_ITEM libs_to_build openflow)
   endif()
 
   # Create library names to solve dependency problems with macros that will be called at each lib subdirectory
   set(ns3-libs)
+  set(ns3-all-libs)
   set(ns3-libs-tests)
   set(ns3-contrib-libs)
   set(lib-ns3-static-objs)
@@ -735,6 +730,7 @@ CommandLine configuration in those files instead.
     # Create libname of output library of module
     set(lib${libname} lib${libname})
     set(lib${libname}-obj lib${libname}-obj)
+    list(APPEND ns3_all_libs ${lib${libname}})
 
     if(NOT (${libname} STREQUAL "test"))
       list(APPEND lib-ns3-static-objs $<TARGET_OBJECTS:${lib${libname}-obj}>)
@@ -760,7 +756,7 @@ CommandLine configuration in those files instead.
     set_target_properties(stdlib_pch PROPERTIES POSITION_INDEPENDENT_CODE True)
     target_precompile_headers(stdlib_pch PUBLIC "${precompiled_header_libraries}")
 
-    add_library(stdlib_pch_exec OBJECT src/empty_main.cc)
+    add_library(stdlib_pch_exec OBJECT ${PROJECT_SOURCE_DIR}/buildsupport/empty_main.cc)
     set_target_properties(stdlib_pch_exec PROPERTIES POSITION_INDEPENDENT_CODE False)
     target_precompile_headers(stdlib_pch_exec PUBLIC "${precompiled_header_libraries}")
   endif()
@@ -768,16 +764,10 @@ CommandLine configuration in those files instead.
   # Create new lib for NS3 static builds
   set(lib-ns3-static ns${NS3_VER}-static-${build_type})
 
-  # string (REPLACE ";" " " libs_to_build_txt "${libs_to_build}")
-  # add_definitions(-DNS3_MODULES_PATH=${libs_to_build_txt})
-
-  # Dump definitions for later use
-  get_directory_property(ADDED_DEFINITIONS COMPILE_DEFINITIONS)
-  file(WRITE ${CMAKE_HEADER_OUTPUT_DIRECTORY}/ns3-definitions "${ADDED_DEFINITIONS}")
-
   # All contrib libraries can be linked afterwards linking with ${ns3-contrib-libs}
   process_contribution("${contribution_libraries_to_build}")
 
+  # Netanim depends on ns-3 core, so we built it later
   if(${NS3_NETANIM})
     if(${MSVC})
       message(WARNING "Not building netanim with MSVC")
@@ -798,7 +788,6 @@ CommandLine configuration in those files instead.
 endmacro()
 
 function(set_runtime_outputdirectory target_name output_directory)
-  # message(FATAL_ERROR "${target_name} ${output_directory}")
   get_property(local-ns3-executables GLOBAL PROPERTY ns3-execs)
   set_property(GLOBAL PROPERTY ns3-execs "${local-ns3-executables};${output_directory}${target_name}")
 

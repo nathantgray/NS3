@@ -1,4 +1,4 @@
-if(${NS3_REALTIME})
+if(${ENABLE_REALTIME})
   set(name realtime-udp-echo)
   set(source_files ${name}.cc)
   set(header_files)

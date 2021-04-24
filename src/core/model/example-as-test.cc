@@ -40,7 +40,7 @@ NS_LOG_COMPONENT_DEFINE ("ExampleAsTestCase");
 
 // Running tests as examples currently requires bash shell; uses Unix
 // piping that does not work on Windows.
-#if defined(NS3_ENABLE_EXAMPLES) && !defined (__WIN32__)
+#if defined(NS3_ENABLE_EXAMPLES) && !defined (__win32__)
 
 ExampleAsTestCase::ExampleAsTestCase (const std::string name,
                                       const std::string program,
@@ -86,23 +86,28 @@ ExampleAsTestCase::DoRun (void)
   std::string testFile = CreateTempDirFilename  (GetName () + ".reflog");
 
   std::stringstream ss;
-
+#ifndef CMAKE_EXAMPLE_AS_TEST
   // Use bash as shell to allow use of PIPESTATUS
   ss << "bash -c './waf --run-no-build " << m_program
-     << " --command-template=\"" << GetCommandTemplate () << "\""
-
+     << " --command-template=\"" << GetCommandTemplate () << "\"";
+#else
+  char buff[500];
+  sprintf(buff, GetCommandTemplate().c_str(), m_program.c_str());
+  ss << "bash -c '" << buff;
+#endif
     // redirect std::clog, std::cerr to std::cout
-     << " 2>&1 "
+  ss << " 2>&1 "
 
     // Suppress the waf lines from output; waf output contains directory paths which will
     // obviously differ during a test run
+#ifndef CMAKE_EXAMPLE_AS_TEST
      << " | grep -v 'Waf:' "
+#endif
      << GetPostProcessingCommand ()
      << " > " << testFile
 
     // Get the status of waf
      << "; exit ${PIPESTATUS[0]}'";
-
   int status = std::system (ss.str ().c_str ());
 
   std::cout << "command:  " << ss.str () << "\n"
@@ -138,6 +143,6 @@ ExampleAsTestSuite::ExampleAsTestSuite (const std::string name,
   AddTestCase (new ExampleAsTestCase (name, program, dataDir, args), duration);
 }
 
-#endif // NS3_ENABLE_EXAMPLES && !defined (__WIN32__)
+#endif // NS3_ENABLE_EXAMPLES && !defined (__win32__)
 
 }  // namespace ns3

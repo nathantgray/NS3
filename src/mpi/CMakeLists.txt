@@ -1,23 +1,28 @@
-if(${NS3_MPI})
-  set(name mpi)
+set(name mpi)
 
-  set(source_files
-      model/distributed-simulator-impl.cc
-      model/granted-time-window-mpi-interface.cc
-      model/mpi-receiver.cc
-      model/null-message-simulator-impl.cc
-      model/null-message-mpi-interface.cc
-      model/remote-channel-bundle.cc
-      model/remote-channel-bundle-manager.cc
-      model/mpi-interface.cc
-      model/parallel-communication-interface.h
-  )
+set(source_files
+    model/distributed-simulator-impl.cc
+    model/granted-time-window-mpi-interface.cc
+    model/mpi-receiver.cc
+    model/null-message-simulator-impl.cc
+    model/null-message-mpi-interface.cc
+    model/remote-channel-bundle.cc
+    model/remote-channel-bundle-manager.cc
+    model/mpi-interface.cc
+    model/parallel-communication-interface.h
+)
 
-  set(header_files model/mpi-receiver.h model/mpi-interface.h model/parallel-communication-interface.h)
+set(header_files model/mpi-receiver.h model/mpi-interface.h model/parallel-communication-interface.h)
 
-  set(libraries_to_link ${libcore} ${libnetwork})
+set(libraries_to_link ${libcore} ${libnetwork} ${MPI_CXX_LIBRARIES})
 
-  set(test_sources)
-
-  build_lib("${name}" "${source_files}" "${header_files}" "${libraries_to_link}" "${test_sources}")
+set(example_as_test_suite)
+if(${NS3_EXAMPLES} AND (NOT WIN32))
+  set(example_as_test_suite test/mpi-test-suite.cc)
 endif()
+
+set(test_sources ${example_as_test_suite})
+
+build_lib("${name}" "${source_files}" "${header_files}" "${libraries_to_link}" "${test_sources}")
+
+target_include_directories(${libmpi-obj} PUBLIC ${MPI_CXX_INCLUDE_PATH})

@@ -282,6 +282,7 @@ set(test_sources
     test/wifi-phy-thresholds-test.cc
     test/wifi-phy-reception-test.cc
     test/inter-bss-test-suite.cc
+    test/wifi-primary-channels-test.cc
     test/wifi-phy-ofdma-test.cc
     test/wifi-mac-queue.cc
 )

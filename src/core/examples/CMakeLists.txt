@@ -95,7 +95,7 @@ if(${NS3_ENABLE_BUILD_VERSION})
   build_lib_example("${name}" "${source_files}" "${header_files}" "${libraries_to_link}" "${files_to_copy}")
 endif()
 
-if(${NS3_REALTIME})
+if(${ENABLE_REALTIME})
   set(name main-test-sync)
   set(source_files ${name}.cc)
   set(header_files)

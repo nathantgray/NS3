@@ -19,6 +19,7 @@ set(libraries_to_link)
 
 set(gsl_test_sources)
 if(${GSL_FOUND})
+  include_directories(${GSL_INCLUDE_DIRS})
   set(libraries_to_link ${libraries_to_link} ${GSL_LIBRARIES})
   set(gsl_test_sources test/rng-test-suite.cc test/random-variable-stream-test-suite.cc)
 endif()
@@ -37,7 +38,7 @@ endif()
 
 set(rt_sources)
 set(rt_headers)
-if(${NS3_REALTIME})
+if(${ENABLE_REALTIME})
   set(rt_sources model/realtime-simulator-impl.cc model/wall-clock-synchronizer.cc)
   set(rt_headers model/realtime-simulator-impl.h model/wall-clock-synchronizer.h)
   set(libraries_to_link ${libraries_to_link} ${LIBRT})
@@ -92,10 +93,11 @@ if(${NS3_PTHREAD})
   endif()
 endif()
 
-# Test will obviously fail due to waf dependency, disabling to prevent runner from caching ccache files
-# if(${NS3_EXAMPLES}) set(examples_as_tests_sources model/example-as-test.cc ) set(examples_as_tests_headers
-# model/example-as-test.h ) set(examples_as_tests_test_sources test/examples-as-tests-test-suite.cc #
-# core-example-simulator and examples-as-tests-test-suite will fail as it relies on Waf ) endif()
+if(${NS3_EXAMPLES} AND (NOT WIN32))
+  set(example_as_test_sources model/example-as-test.cc)
+  set(example_as_test_headers model/example-as-test.h)
+  set(example_as_test_suite test/examples-as-tests-test-suite.cc)
+endif()
 
 # Embedded version support
 set(embedded_version_sources)
@@ -112,6 +114,7 @@ set(source_files
     ${int64x64_sources}
     ${thread_sources}
     ${valgrind_sources}
+    ${example_as_test_sources}
     model/time.cc
     model/event-id.cc
     model/scheduler.cc
@@ -175,7 +178,6 @@ set(source_files
     model/length.cc
     model/trickle-timer.cc
     helper/csv-reader.cc
-    ${examples_as_tests_sources}
 )
 
 # Define core lib headers
@@ -183,7 +185,7 @@ set(header_files
     ${rt_headers}
     ${int64x64_headers}
     ${thread_headers}
-    ${examples_as_tests_headers}
+    ${example_as_test_headers}
     model/valgrind.h
     model/nstime.h
     model/event-id.h
@@ -275,7 +277,6 @@ set(header_files
     model/node-printer.h
     model/show-progress.h
     model/time-printer.h
-    model/example-as-test.h
     model/pair.h
     model/length.h
     model/trickle-timer.h
@@ -283,6 +284,9 @@ set(header_files
 )
 
 set(test_sources
+    ${example_as_test_suite}
+    ${gsl_test_sources}
+    ${thread_test_sources}
     test/attribute-test-suite.cc
     test/attribute-container-test-suite.cc
     test/build-profile-test-suite.cc
@@ -309,9 +313,6 @@ set(test_sources
     test/type-id-test-suite.cc
     test/length-test-suite.cc
     test/trickle-timer-test-suite.cc
-    ${examples_as_tests_test_sources}
-    ${gsl_test_sources}
-    ${thread_test_sources}
 )
 
 # Build core lib

@@ -29,6 +29,7 @@ if(${ENABLE_THREADING} AND HAVE_NET_ETHERNET_H)
   if(HAVE_IF_NETS_H
      AND HAVE_IF_TUN_H
      AND HAVE_SYS_IOCTL_H
+     AND ${NS3_TAP}
   )
     set(ENABLE_TAP True)
   endif()
@@ -36,6 +37,7 @@ if(${ENABLE_THREADING} AND HAVE_NET_ETHERNET_H)
   if(HAVE_IF_NETS_H
      AND HAVE_PACKET_H
      AND HAVE_SYS_IOCTL_H
+     AND ${NS3_EMU}
   )
     set(ENABLE_EMU True)
     add_definitions(-DHAVE_PACKET_H)
@@ -60,19 +62,7 @@ if(${ENABLE_FDNETDEV})
     endif()
   endmacro()
 
-  if(${NS3_TAP} AND ${ENABLE_TAP})
-    set(tap_sources helper/tap-fd-net-device-helper.cc)
-    set(tap_headers helper/tap-fd-net-device-helper.h)
-
-    exec_name(tap-device-creator)
-    add_executable(tap-device-creator helper/tap-device-creator.cc helper/encode-decode.cc helper/creator-utils.cc)
-    add_definitions(-DTAP_DEV_CREATOR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/fd-net-device/${tap-device-creator}")
-    set_runtime_outputdirectory(tap-device-creator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/fd-net-device/)
-
-    list(APPEND fd-net-device_creators tap-device-creator)
-  endif()
-
-  if(${NS3_EMU} AND ${ENABLE_EMU})
+  if(${ENABLE_EMU})
     set(emu_sources helper/emu-fd-net-device-helper.cc)
     set(emu_headers helper/emu-fd-net-device-helper.h)
 
@@ -84,7 +74,19 @@ if(${ENABLE_FDNETDEV})
     list(APPEND fd-net-device_creators raw-sock-creator)
   endif()
 
-  if(${NS3_TAP} AND ${NS3_PLANETLAB})
+  if(${ENABLE_TAP})
+    set(tap_sources helper/tap-fd-net-device-helper.cc)
+    set(tap_headers helper/tap-fd-net-device-helper.h)
+
+    exec_name(tap-device-creator)
+    add_executable(tap-device-creator helper/tap-device-creator.cc helper/encode-decode.cc helper/creator-utils.cc)
+    add_definitions(-DTAP_DEV_CREATOR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/fd-net-device/${tap-device-creator}")
+    set_runtime_outputdirectory(tap-device-creator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/fd-net-device/)
+
+    list(APPEND fd-net-device_creators tap-device-creator)
+  endif()
+
+  if(${ENABLE_TAP} AND ${NS3_PLANETLAB}) # todo: find planetlab libraries
     set(planetlab_sources helper/planetlab-fd-net-device-helper.cc)
     set(planetlab_headers helper/planetlab-fd-net-device-helper.h)
 
@@ -131,14 +133,8 @@ if(${ENABLE_FDNETDEV})
       helper/creator-utils.cc
   )
 
-  set(header_files
-      ${tap_headers}
-      ${emu_headers}
-      ${planetlab_headers}
-      ${netmap_headers}
-      ${dpdk_headers}
-      model/fd-net-device.h
-      helper/fd-net-device-helper.h
+  set(header_files ${tap_headers} ${emu_headers} ${planetlab_headers} ${dpdk_headers} model/fd-net-device.h
+                   helper/fd-net-device-helper.h
   )
 
   set(libraries_to_link ${libnetwork} ${LIB_AS_NEEDED_PRE} ${DPDK_LIBRARIES} ${LIB_AS_NEEDED_POST})

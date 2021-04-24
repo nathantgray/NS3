@@ -12,10 +12,7 @@
 # Author: Gabriel Ferreira <gabrielcarvfer@gmail.com>
 
 function(create_test test_name test_id test_arguments working_directory)
-  # message(WARNING "${test_name} ${test_id} ${test_arguments} ${working_directory}") test.py assume the binary is
-  # executed inside the ns-3-dev folder, or ${PROJECT_SOURCE_DIR} in CMake land I preferred to execute within the
-  # build/example or build/src/module/example folders, passed as ${working_directory}), keeping all output files inside
-  # the build/bin folder
+  # test.py assume the binary is executed inside the ns-3-dev folder, or ${PROJECT_SOURCE_DIR} in CMake land
   if(WIN32)
     # Windows require this workaround to make sure the DLL files are located
     add_test(

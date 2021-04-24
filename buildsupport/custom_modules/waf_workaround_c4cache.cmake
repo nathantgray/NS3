@@ -52,7 +52,7 @@ function(generate_c4che_cachepy)
   )
 
   cache_cmake_flag(NS3_NSC "NSC_ENABLED" cache_contents) # missing support
-  cache_cmake_flag(NS3_REALTIME "ENABLE_REAL_TIME" cache_contents)
+  cache_cmake_flag(ENABLE_REALTIME "ENABLE_REAL_TIME" cache_contents)
   cache_cmake_flag(NS3_PTHREAD "ENABLE_THREADING" cache_contents)
   cache_cmake_flag(NS3_EXAMPLES "ENABLE_EXAMPLES" cache_contents)
   cache_cmake_flag(NS3_TESTS "ENABLE_TESTS" cache_contents)

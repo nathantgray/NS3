@@ -34,7 +34,7 @@ macro(
     get_property(local-ns3-libs GLOBAL PROPERTY ns3-libs)
     set_property(GLOBAL PROPERTY ns3-libs "${local-ns3-libs};${lib${libname}}")
   else()
-    get_property(local-ns3-contrib-libs GLOBAL PROPERTY ns3-libs)
+    get_property(local-ns3-contrib-libs GLOBAL PROPERTY ns3-contrib-libs)
     set_property(GLOBAL PROPERTY ns3-contrib-libs "${local-ns3-libs};${lib${libname}}")
   endif()
 
@@ -45,17 +45,27 @@ macro(
   # Create shared library with previously created object library (saving compilation time for static libraries)
   add_library(${lib${libname}} SHARED $<TARGET_OBJECTS:${lib${libname}-obj}>)
 
-  # Link the shared library with the libraries passed
-  target_link_libraries(${lib${libname}} ${LIB_AS_NEEDED_PRE} "${libraries_to_link}" ${LIB_AS_NEEDED_POST})
-
-  set_target_properties(${lib${libname}} PROPERTIES OUTPUT_NAME ns${NS3_VER}-${libname}-${build_type})
-
+  # Split ns and non-ns libraries to manage their propagation properly
   set(non_ns_libraries_to_link)
+  set(ns_libraries_to_link)
   foreach(library ${libraries_to_link})
-    if(NOT (${library} MATCHES "ns3"))
+    if(${library} IN_LIST ns3_all_libs)
+      list(APPEND ns_libraries_to_link ${library})
+    else()
       list(APPEND non_ns_libraries_to_link ${library})
     endif()
   endforeach()
+
+  # ns-3 libraries are linked publicly, to make sure other modules can find each other without being directly linked
+  target_link_libraries(${lib${libname}} PUBLIC ${LIB_AS_NEEDED_PRE} "${ns_libraries_to_link}" ${LIB_AS_NEEDED_POST})
+
+  # non-ns-3 libraries are linked privately, not propagating unnecessary libraries such as pthread, librt, etc
+  target_link_libraries(
+    ${lib${libname}} PRIVATE ${LIB_AS_NEEDED_PRE} "${non_ns_libraries_to_link}" ${LIB_AS_NEEDED_POST}
+  )
+
+  # set output name of library
+  set_target_properties(${lib${libname}} PROPERTIES OUTPUT_NAME ns${NS3_VER}-${libname}-${build_type})
 
   if(${NS3_STATIC})
     get_property(local-ns3-external-libs GLOBAL PROPERTY ns3-external-libs)
@@ -176,12 +186,6 @@ macro(
     add_library(${libname}-bindings SHARED "${python_module_files}")
     target_include_directories(${libname}-bindings PRIVATE ${Python3_INCLUDE_DIRS} ${bindings_output_folder})
 
-    # Search for ns-3 modules in the libraries_to_link list
-    set(ns_libraries_to_link ${libraries_to_link})
-    foreach(library ${non_ns_libraries_to_link})
-      list(REMOVE_ITEM ns_libraries_to_link ${library})
-    endforeach()
-
     # If there is any, remove the "lib" prefix of libraries (search for "set(lib${libname}")
     list(LENGTH ns_libraries_to_link num_libraries)
     if(num_libraries GREATER "0")
@@ -199,7 +203,9 @@ macro(
     set(prefix)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/${libname}.py)
       set(prefix _)
-      file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/${libname}.py DESTINATION ${CMAKE_OUTPUT_DIRECTORY}/bindings/python/ns)
+      file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/${libname}.py
+           DESTINATION ${CMAKE_OUTPUT_DIRECTORY}/bindings/python/ns
+      )
     endif()
 
     # Set binding library name and output folder

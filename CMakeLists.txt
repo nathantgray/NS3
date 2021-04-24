@@ -24,7 +24,8 @@ if(CCACHE_FOUND)
 
   # Setting CCACHE_SLOPPINES here only works if you call cmake to build instead of using your build system. Just
   # configure ccache directly and it will do the trick. WARNING: ccache settings and version may cause it to may slown
-  # down the build when using pch set(ENV{CCACHE_SLOPPINESS} "pch_defines,time_macros")
+  # down the build when using pch
+  set(ENV{CCACHE_SLOPPINESS} "pch_defines,time_macros")
 endif(CCACHE_FOUND)
 
 # ######################################################################################################################
@@ -36,35 +37,47 @@ include(buildsupport/macros_and_definitions.cmake)
 
 set(NS3_VER 3-dev)
 
-option(NS3_LOG "Enable logging to be built" OFF)
+# common options
 option(NS3_ASSERT "Enable assert on failure" OFF)
-option(NS3_TESTS "Enable tests to be built" OFF)
-option(NS3_COVERAGE "Enable code coverage measurements and report generation" OFF)
 option(NS3_EXAMPLES "Enable examples to be built" OFF)
-option(NS3_ENABLE_BUILD_VERSION "Embed version info into libraries" OFF)
-option(NS3_PRECOMPILE_HEADERS "Precompile module headers to speed up compilation" OFF)
-option(NS3_SANITIZE "Build with sanitizers" OFF)
-option(NS3_CLANG_TIDY "Use clang-tidy static analysis" OFF)
-option(NS3_CLANG_FORMAT "Enforce cody style with clang-format" OFF)
-option(NS3_PYTHON_BINDINGS "Build ns-3 python bindings" OFF)
-option(NS3_OPENFLOW "Build with Openflow support" OFF)
-option(NS3_GTK2 "Build with GTK2 support" ON)
-option(NS3_MPI "Build with MPI support" ON)
-option(NS3_PYTORCH "Build components that rely on PyTorch support" OFF)
-option(NS3_GSL "Build with GSL support" ON)
+option(NS3_LOG "Enable logging to be built" OFF)
+option(NS3_TESTS "Enable tests to be built" OFF)
+
+# fd-net-device options
+option(NS3_EMU "Build with emulation support" ON)
 option(NS3_PLANETLAB "Build with Planetlab support" OFF)
 option(NS3_TAP "Build with Tap support" ON)
-option(NS3_EMU "Build with emulation support" ON)
+
+# maintenance and documentation
+option(NS3_COVERAGE "Enable code coverage measurements and report generation" OFF)
+option(NS3_CLANG_FORMAT "Enforce cody style with clang-format" OFF)
+option(NS3_CLANG_TIDY "Use clang-tidy static analysis" OFF)
+option(NS3_DOCS "Generate documentation" OFF)
+option(NS3_SANITIZE "Build with sanitizers" OFF)
+option(NS3_LINK_WHAT_YOU_USE "Use LWYU to determine unnecessary linked libraries" OFF)
+option(NS3_INCLUDE_WHAT_YOU_USE "Use IWYU to determine unnecessary headers included" OFF)
+
+# 3rd-party libraries/programs
 option(NS3_BRITE "Build with brite support" OFF)
 option(NS3_CLICK "Build with click support" OFF)
-option(NS3_GNUPLOT "Build with Gnuplot support" OFF)
 option(NS3_NETANIM "Build netanim support" OFF)
+option(NS3_OPENFLOW "Build with Openflow support" OFF)
+
+# other options
+option(NS3_ENABLE_BUILD_VERSION "Embed version info into libraries" OFF)
+option(NS3_GNUPLOT "Build with Gnuplot support" OFF)
+option(NS3_GSL "Build with GSL support" ON)
+option(NS3_GTK2 "Build with GTK2 support" ON)
+option(NS3_MPI "Build with MPI support" ON)
+option(NS3_NSC "Build with NSC support" OFF) # currently not supported
+option(NS3_PRECOMPILE_HEADERS "Precompile module headers to speed up compilation" OFF)
 option(NS3_PTHREAD "Build with pthread support" ON)
+option(NS3_PYTHON_BINDINGS "Build ns-3 python bindings" OFF)
 option(NS3_REALTIME "Build with realtime support" ON)
 option(NS3_STATIC "Build a static ns-3 library and link it against executables" OFF)
-option(NS3_NSC "Build with NSC support" OFF) # currently not supported
-option(NS3_DOCS "Generate documentation" OFF)
 
+# custom options
+option(NS3_PYTORCH "Build components that rely on PyTorch support" OFF)
 option(AUTOINSTALL_DEPENDENCIES "Automatically download and compile required dependencies with Vcpkg" OFF)
 
 # Check if optional configuration file (configFile.cmake) exists. It will overlap command line arguments.

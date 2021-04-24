@@ -1,13 +1,14 @@
 if(${NS3_TESTS})
   get_property(local-ns3-libs GLOBAL PROPERTY ns3-libs)
   get_property(local-ns3-libs-tests GLOBAL PROPERTY ns3-libs-tests)
+  get_property(local-ns3-libs-tests-external GLOBAL PROPERTY ns3-libs-tests-external)
 
   if(WIN32)
     set(libraries_to_link ${local-ns3-libs})
     list(REMOVE_ITEM libraries_to_link ${libtest})
 
     add_executable(test-runner test-runner.cc ${local-ns3-libs-tests} $<TARGET_OBJECTS:${libtest}>)
-    target_link_libraries(test-runner ${LIB_AS_NEEDED_PRE} ${libraries_to_link} ${LIB_AS_NEEDED_POST})
+    target_link_libraries(test-runner ${LIB_AS_NEEDED_PRE} ${libraries_to_link} ${LIB_AS_NEEDED_POST} ${local-ns3-libs-tests-external})
   else()
     add_executable(test-runner test-runner.cc $<TARGET_OBJECTS:${libtest}>)
     target_link_libraries(

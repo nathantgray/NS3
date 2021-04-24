@@ -109,6 +109,9 @@ macro(
 
         # Create shared library containing tests of the module
         add_library(${test${libname}} OBJECT "${test_sources}")
+
+        get_property(local-ns3-libs-tests-external GLOBAL PROPERTY ns3-libs-tests-external)
+        set_property(GLOBAL PROPERTY ns3-libs-tests-external "${local-ns3-libs-tests-external};${non_ns_libraries_to_link}")
       else()
         set_property(GLOBAL PROPERTY ns3-libs-tests "${local-ns3-libs-tests};${test${libname}}")
 

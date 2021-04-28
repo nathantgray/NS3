@@ -11,6 +11,17 @@
 #
 # Author: Gabriel Ferreira <gabrielcarvfer@gmail.com>
 
+#
+# This macro copy all files to the header output directory
+# 
+macro(copy_headers header_files subdirectory_to_install)
+  foreach(header ${header_files})
+    get_filename_component(header_name ${header} NAME)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${header} ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${subdirectory_to_install}/${header_name} COPYONLY)
+  endforeach()
+endmacro()
+
+
 # This macro processes a ns-3 module
 #
 # Arguments: folder = src or contrib/contributor_module libname = core, wifi, contributor_module source_files =
@@ -91,7 +102,7 @@ macro(
   write_module_header("${module_header}" "${header_files}")
 
   # Copy all header files to outputfolder/include
-  file(COPY ${header_files} DESTINATION ${CMAKE_HEADER_OUTPUT_DIRECTORY})
+  copy_headers("${header_files}" "")
 
   # Build tests if requested
   if(${NS3_TESTS})
@@ -310,5 +321,35 @@ macro(write_module_header name header_files)
   list(APPEND contents "
 #endif "
   )
-  file(WRITE ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h ${contents})
+
+  # Check if a module header already exists and if contents match. If they do, don't write a new one
+  set(write_header FALSE)
+  if(NOT (EXISTS ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h))
+    set(write_header TRUE)
+  else()
+    file(READ ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h old_contents)
+
+    # Get number of headers included by old module header
+    if(${old_contents} MATCHES ".h")
+      set(num_old_headers ${CMAKE_MATCH_COUNT})
+    endif()
+
+    # Compare each new header with older ones
+    foreach(header ${header_files})
+      get_filename_component(header_name ${header} NAME)
+      if(${old_contents} MATCHES ${header_name})
+        math(EXPR num_old_headers "${num_old_headers}-1")
+      else()
+        set(write_header TRUE)
+      endif()
+    endforeach()
+
+    # If number of headers don't match number of new ones, write a new one
+    if(${num_old_headers} GREATER "0")
+      set(write_header TRUE)
+    endif()
+  endif()
+  if(write_header)
+    file(WRITE ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h ${contents})
+  endif()
 endmacro()

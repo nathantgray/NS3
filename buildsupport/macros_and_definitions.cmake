@@ -63,7 +63,7 @@ set(CMAKE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY})
-set(CMAKE_HEADER_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/ns3)
+set(CMAKE_HEADER_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/include/ns3)
 set(THIRD_PARTY_DIRECTORY ${PROJECT_SOURCE_DIR}/3rd-party)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 link_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -350,8 +350,7 @@ macro(process_options)
     set_property(TARGET torch PROPERTY INTERFACE_COMPILE_OPTIONS)
   endif()
 
-  # Set common include folder (./build, where we find ns3/core-module.h)
-  include_directories(${CMAKE_OUTPUT_DIRECTORY})
+  # Set common include folder (./build/include, where we find ns3/core-module.h)
   include_directories(${CMAKE_OUTPUT_DIRECTORY}/include)
 
   # find required dependencies

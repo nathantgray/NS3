@@ -340,4 +340,4 @@ set(test_sources
 
 build_lib("${name}" "${source_files}" "${header_files}" "${libraries_to_link}" "${test_sources}")
 
-file(COPY ${private_header_files} DESTINATION ${CMAKE_HEADER_OUTPUT_DIRECTORY}/private)
+copy_headers("${private_header_files}" "private")

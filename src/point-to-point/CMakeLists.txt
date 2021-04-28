@@ -9,7 +9,7 @@ if(${ENABLE_MPI})
   set(mpi_sources model/point-to-point-remote-channel.cc)
   set(mpi_headers model/point-to-point-remote-channel.h)
   set(mpi_libraries ${libmpi} ${MPI_CXX_LIBRARIES})
-  set(mpi_include_directories ${MPI_CXX_INCLUDE_PATH})
+  set(mpi_include_directories ${MPI_CXX_INCLUDE_DIRS})
 endif()
 
 set(source_files ${mpi_sources} model/point-to-point-net-device.cc model/point-to-point-channel.cc model/ppp-header.cc

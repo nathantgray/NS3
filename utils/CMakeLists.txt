@@ -1,9 +1,10 @@
 if(${NS3_TESTS})
   get_property(local-ns3-libs GLOBAL PROPERTY ns3-libs)
   get_property(local-ns3-libs-tests GLOBAL PROPERTY ns3-libs-tests)
-  get_property(local-ns3-libs-tests-external GLOBAL PROPERTY ns3-libs-tests-external)
 
   if(WIN32)
+    get_property(local-ns3-libs-tests-external GLOBAL PROPERTY ns3-libs-tests-external)
+
     set(libraries_to_link ${local-ns3-libs})
     list(REMOVE_ITEM libraries_to_link ${libtest})
 

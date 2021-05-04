@@ -43,7 +43,7 @@
  *
  * Type: string literal
  */
-#cmakedefine NS3_VERSION_TAG @VERSION_TAG@
+#cmakedefine NS3_VERSION_TAG @NS3_VERSION_TAG@
 
 /**
  * The tag closest to the tip of the current branch
@@ -56,7 +56,7 @@
  *
  * Type: string literal
  */
-#cmakedefine NS3_VERSION_CLOSEST_TAG @CLOSEST_TAG@
+#cmakedefine NS3_VERSION_CLOSEST_TAG @NS3_VERSION_CLOSEST_TAG@
 
 /**
  * The major version extracted from #NS3_VERSION_TAG
@@ -66,7 +66,7 @@
  *
  * Type: integer
  */
-#cmakedefine NS3_VERSION_MAJOR @VERSION_MAJOR@
+#cmakedefine NS3_VERSION_MAJOR @NS3_VERSION_MAJOR@
 
 /**
  * The minor version extracted from #NS3_VERSION_TAG
@@ -76,7 +76,7 @@
  *
  * Type: integer
  */
-#cmakedefine NS3_VERSION_MINOR @VERSION_MINOR@
+#cmakedefine NS3_VERSION_MINOR @NS3_VERSION_MINOR@
 
 /**
  * The patch number extracted from #NS3_VERSION_TAG
@@ -89,7 +89,7 @@
  *
  * Type: integer
  */
-#cmakedefine NS3_VERSION_PATCH @VERSION_PATCH@
+#cmakedefine NS3_VERSION_PATCH @NS3_VERSION_PATCH@
 
 /**
  * The portion of the #NS3_VERSION_TAG indicating the version
@@ -102,7 +102,7 @@
  *
  * Type: string literal
  */
-#cmakedefine NS3_VERSION_RELEASE_CANDIDATE @VERSION_RELEASE_CANDIDATE@
+#cmakedefine NS3_VERSION_RELEASE_CANDIDATE @NS3_VERSION_RELEASE_CANDIDATE@
 
 /**
  * The number of repository commits between #NS3_VERSION_CLOSEST_TAG
@@ -110,7 +110,7 @@
  *
  * Type: integer
  */
-#cmakedefine NS3_VERSION_TAG_DISTANCE @VERSION_TAG_DISTANCE@
+#cmakedefine NS3_VERSION_TAG_DISTANCE @NS3_VERSION_TAG_DISTANCE@
 
 /**
  * Hash value which uniquely identifies the commit of the
@@ -120,7 +120,7 @@
  *
  * Type: string literal
  */
-#cmakedefine NS3_VERSION_COMMIT_HASH @VERSION_COMMIT_HASH@
+#cmakedefine NS3_VERSION_COMMIT_HASH @NS3_VERSION_COMMIT_HASH@
 
 /**
  * Flag indicating whether the repository working tree had uncommitted
@@ -130,7 +130,7 @@
  *
  * Type: integer
  */
-#cmakedefine NS3_VERSION_DIRTY_FLAG @VERSION_DIRTY_FLAG@
+#cmakedefine01 NS3_VERSION_DIRTY_FLAG
 
 /**
  * Indicates the build profile that was specified by the --build-profile option
@@ -138,7 +138,7 @@
  *
  * Type: string literal
  */
-#cmakedefine NS3_VERSION_BUILD_PROFILE @BUILD_PROFILE@
+#cmakedefine NS3_VERSION_BUILD_PROFILE @NS3_VERSION_BUILD_PROFILE@
 
 /** @} */
 

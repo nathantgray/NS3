@@ -54,12 +54,12 @@ endif()
 set(int64x64_sources)
 set(int64x64_headers)
 
-if(INT64X64 STREQUAL "128")
+if(${INT64X64} MATCHES "INT128")
   set(int64x64_sources model/int64x64-128.cc)
   set(int64x64_headers model/int64x64-128.h)
-elseif(INT64X64 STREQUAL "DOUBLE")
+elseif(${INT64X64} MATCHES "DOUBLE")
   set(int64x64_headers model/int64x64-double.h)
-elseif(INT64X64 STREQUAL "CAIRO")
+elseif(${INT64X64} MATCHES "CAIRO")
   set(int64x64_sources model/int64x64-cairo.cc)
   set(int64x64_headers model/int64x64-cairo.h model/cairo-wideint-private.h)
 endif()
@@ -115,6 +115,7 @@ set(source_files
     ${thread_sources}
     ${valgrind_sources}
     ${example_as_test_sources}
+    ${embedded_version_sources}
     model/time.cc
     model/event-id.cc
     model/scheduler.cc
@@ -186,6 +187,7 @@ set(header_files
     ${int64x64_headers}
     ${thread_headers}
     ${example_as_test_headers}
+    ${embedded_version_headers}
     model/valgrind.h
     model/nstime.h
     model/event-id.h

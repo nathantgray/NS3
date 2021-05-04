@@ -16,6 +16,7 @@ message(WARNING "Configuration file being used")
 #set(NS3_CLANG_TIDY ON)
 #set(NS3_DOCS ON)
 #set(NS3_SANITIZE ON)
+#set(NS3_SCAN_PYTHON_BINDINGS ON)
 #set(NS3_LINK_WHAT_YOU_USE ON)
 #set(NS3_INCLUDE_WHAT_YOU_USE ON)
 

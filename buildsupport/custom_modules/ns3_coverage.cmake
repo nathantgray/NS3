@@ -22,13 +22,9 @@ if(${NS3_COVERAGE})
     message(FATAL_ERROR "LCOV is required but it is not installed.")
   endif()
 
-  # Create a custom target to run test.py --nowaf .gcno and .gcda code coverage output will be in ${CMAKE_BINARY_DIR}
-  # a.k.a. cmake_cache/cmake-build-${build_suffix}
-  add_custom_target(
-    run_test_py
-    COMMAND python3 test.py --nowaf
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
+  # The following target will run test.py --nowaf to generate the code coverage files
+  # .gcno and .gcda output will be in ${CMAKE_BINARY_DIR}
+  # a.k.a. cmake_cache or cmake-build-${build_suffix}
 
   # Create output directory for coverage info and html
   file(MAKE_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/coverage)

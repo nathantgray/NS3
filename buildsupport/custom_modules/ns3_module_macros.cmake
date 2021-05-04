@@ -158,12 +158,55 @@ macro(
     endif()
   endif()
 
+  # Get architecture pair for python bindings
+  set(arch gcc_ILP32)
+  set(arch_flag)
+  if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    set(arch gcc_LP64)
+    set(arch_flag -m64)
+  endif()
+
+  # Add target to scan python bindings
+  if(${NS3_SCAN_PYTHON_BINDINGS} AND EXISTS ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${libname}-module.h)
+    set(bindings_output_folder ${PROJECT_SOURCE_DIR}/${folder}/${libname}/bindings)
+    file(MAKE_DIRECTORY ${bindings_output_folder})
+    set(module_api ${bindings_output_folder}/modulegen__${arch}.py)
+
+    set(modulescan_modular_command ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/bindings/python/ns3modulescan-modular.py
+            )
+
+    # To build the header map for the module, we start by copying the headers and prepending the dictionary start
+    set(header_map "{\\\"${header_files};")
+
+    # We then remove model/ helper/ prefixes
+    # e.g. {'model/angles.h;model/antenna-model.h;... -> {'angles.h;antenna-model.h;...)
+    string(REPLACE "model/" "" header_map "${header_map}")
+    string(REPLACE "helper/" "" header_map "${header_map}")
+
+    # Now we replace list entry separators (;) with ending of the string quote ("),
+    # followed by the relative module
+    # e.g. {"model/angles.h;model/antenna-model.h;... -> {"angles.h" : "antenna", "antenna-model.h": "antenna", "...)
+    string(REPLACE ";" "\\\": \\\"${libname}\\\", \\\"" header_map "${header_map}")
+
+    # We now remove the last character ("), which needs to be replaced with a (}), to close the dictionary
+    # e.g. "antenna-model.h" : "antenna", " -> "antenna-model.h" : "antenna"
+    string(LENGTH "${header_map}" header_map_len)
+    math(EXPR header_map_len "${header_map_len}-3")
+    string(SUBSTRING "${header_map}" 0 ${header_map_len} header_map)
+
+    # Append end of dictionary (})
+    string(APPEND header_map "}")
+
+    add_custom_target(apiscan-${lib${libname}}
+            COMMAND ${modulescan_modular_command} ${CMAKE_OUTPUT_DIRECTORY} ${libname} ${header_map} ${module_api} ${arch_flag}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            DEPENDS ${lib${libname}}
+    )
+    add_dependencies(apiscan-all apiscan-${lib${libname}})
+  endif()
+
   # Build pybindings if requested and if bindings subfolder exists in NS3/src/libname
   if(${NS3_PYTHON_BINDINGS} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/bindings")
-    set(arch gcc_ILP32)
-    if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-      set(arch gcc_LP64)
-    endif()
     set(bindings_output_folder ${CMAKE_OUTPUT_DIRECTORY}/${folder}/${libname}/bindings)
     file(MAKE_DIRECTORY ${bindings_output_folder})
     set(module_src ${bindings_output_folder}/ns3module.cc)
@@ -251,10 +294,11 @@ endmacro()
 # This macro processes a ns-3 module example
 #
 # Arguments: folder = src or contrib/contributor_module libname = core, wifi, contributor_module (this is implicit, as
-# it is called by build_lib_impl) name = example name (e.g. command-line-example) source_files =
-# "cmake;list;of;.cc;files;" header_files = "cmake;list;of;public;.h;files;" libraries_to_link =
-# "cmake;list;of;${library_names};" files_to_copy =
-# "cmake;list;of;files;used;by;example;that;should;be;copied;to;the;output;folder;"
+# it is called by build_lib_impl)
+# name = example name (e.g. command-line-example)
+# source_files = "cmake;list;of;.cc;files;"
+# header_files = "cmake;list;of;public;.h;files;"
+# libraries_to_link = "cmake;list;of;${library_names};"
 #
 macro(
   build_lib_example_impl

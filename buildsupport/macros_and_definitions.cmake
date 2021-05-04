@@ -14,6 +14,12 @@
 # Export compile time variable setting the directory to the NS3 root folder
 add_definitions(-DPROJECT_SOURCE_PATH="${PROJECT_SOURCE_DIR}")
 
+# Cache options for INT64X64
+set(INT64X64 "INT128" CACHE STRING "Int64x64 implementation")
+set(INT64X64 "CAIRO"  CACHE STRING "Int64x64 implementation")
+set(INT64X64 "DOUBLE" CACHE STRING "Int64x64 implementation")
+set_property(CACHE INT64X64 PROPERTY STRINGS INT128 CAIRO DOUBLE)
+
 # WSLv1 doesn't support tap features
 if(EXISTS "/proc/version")
   file(READ "/proc/version" CMAKE_LINUX_DISTRO)
@@ -172,44 +178,57 @@ macro(process_options)
   endif()
 
   if(${NS3_ENABLE_BUILD_VERSION})
+    include(buildsupport/custom_modules/ns3_versioning.cmake)
     add_definitions(-DENABLE_BUILD_VERSION=1)
 
-    # Split NS3_VER (ns-3.<minor>[.patch][-RC<digit>]) into:
-    string(REPLACE "-" ";" NS3_VER_LIST ${NS3_VER}) # splits into ns;3.<minor>[.patch];RC (len==2 no RC)
+    find_program(GIT git)
+    if(NOT GIT)
+      message(FATAL_ERROR "Baking build version into libraries require Git.")
+    endif()
+
+    check_git_repo_has_ns3_tags(HAS_NS3_TAGS NS3_VERSION_TAG)
+
+    if(NOT ${HAS_NS3_TAGS})
+      message(FATAL_ERROR "This repository doesn't contain ns-3 git tags to bake into the libraries.")
+    endif()
+
+    check_ns3_closest_tags(NS3_VERSION_CLOSEST_TAG NS3_VERSION_TAG_DISTANCE NS3_VERSION_COMMIT_HASH NS3_VERSION_DIRTY_FLAG)
+
+    # Split commit tag (ns-3.<minor>[.patch][-RC<digit>]) into (ns;3.<minor>[.patch];[-RC<digit>]):
+    string(REPLACE "-" ";" NS3_VER_LIST ${NS3_VERSION_TAG})
     list(LENGTH NS3_VER_LIST NS3_VER_LIST_LEN)
 
-    if(${NS4_VER_LIST_LEN} EQUAL 2)
-      set(VERSION_RELEASE_CANDIDATE 0)
-    else()
+    # Get last version tag fragment (RC<digit>)
+    if(${NS3_VER_LIST_LEN} GREATER 2)
       list(GET NS3_VER_LIST 2 RELEASE_CANDIDATE)
-      string(REPLACE "RC" "" RELEASE_CANDIDATE ${RELEASE_CANDIDATE})
-      set(VERSION_RELEASE_CANDIDATE ${RELEASE_CANDIDATE})
+      set(NS3_VERSION_RELEASE_CANDIDATE "\"${RELEASE_CANDIDATE}\"")
+    else()
+      set(NS3_VERSION_RELEASE_CANDIDATE "\"\"")
     endif()
 
+    # Get 3.<minor>[.patch]
     list(GET NS3_VER_LIST 1 VERSION_STRING)
+    # Split into a list 3;<minor>[;patch]
     string(REPLACE "." ";" VERSION_LIST ${VERSION_STRING})
+    list(LENGTH VERSION_LIST VER_LIST_LEN)
 
-    list(GET VERSION_LIST 0 VERSION_MAJOR)
-    list(GET VERSION_LIST 1 VERSION_MINOR)
-    list(GET VERSION_LIST 2 VERSION_PATCH)
+    list(GET VERSION_LIST 0 NS3_VERSION_MAJOR)
+    if(${VER_LIST_LEN} GREATER 1)
+      list(GET VERSION_LIST 1 NS3_VERSION_MINOR)
+      if(${VER_LIST_LEN} GREATER 2)
+        list(GET VERSION_LIST 2 NS3_VERSION_PATCH)
+      endif()
+    endif()
 
-    # todo: Fetch git history and extract:
-    set(VERSION_TAG)
-    set(CLOSEST_TAG)
-    set(VERSION_TAG_DISTANCE)
-    set(VERSION_COMMIT_HASH)
-    set(VERSION_DIRTY_FLAG)
+    # Transform list with 1 entry into strings
+    set(NS3_VERSION_MAJOR "${NS3_VERSION_MAJOR}")
+    set(NS3_VERSION_MINOR "${NS3_VERSION_MINOR}")
+    set(NS3_VERSION_PATCH "${NS3_VERSION_PATCH}")
+    set(NS3_VERSION_TAG "\"${NS3_VERSION_TAG}\"")
 
     # Set
-    set(BUILD_PROFILE ${cmakeBuildType})
+    set(NS3_VERSION_BUILD_PROFILE "\"${cmakeBuildType}\"")
     configure_file(buildsupport/version-defines-template.h ${CMAKE_HEADER_OUTPUT_DIRECTORY}/version-defines.h)
-  endif()
-
-  if(${NS3_TESTS})
-    enable_testing()
-    if(${NS3_EXAMPLES})
-      include(buildsupport/custom_modules/ns3_coverage.cmake)
-    endif()
   endif()
 
   if(${NS3_CLANG_TIDY})
@@ -257,7 +276,7 @@ macro(process_options)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,leak,thread,undefined,memory -g")
   endif()
 
-  if(${NS3_LINK_WHAT_YOU_USE})
+  if(${NS3_LINK_WHAT_YOU_USE} AND (NOT WIN32))
     set(CMAKE_LINK_WHAT_YOU_USE TRUE)
   else()
     set(CMAKE_LINK_WHAT_YOU_USE FALSE)
@@ -439,6 +458,26 @@ macro(process_options)
     set(HAVE_PYTHON_H TRUE)
   endif()
 
+  if(${NS3_SCAN_PYTHON_BINDINGS})
+    # empty scan target that will depend on other module scan targets to scan all of them
+    add_custom_target(apiscan-all)
+  endif()
+
+  if(${NS3_TESTS})
+    enable_testing()
+
+    # Create a custom target to run test.py --nowaf
+    # Target is also used to produce code coverage output
+    add_custom_target(
+            run_test_py
+            COMMAND ${Python3_EXECUTABLE} test.py --nowaf
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+    if(${NS3_EXAMPLES})
+      include(buildsupport/custom_modules/ns3_coverage.cmake)
+    endif()
+  endif()
+
   # Process config-store-config
   configure_file(buildsupport/config-store-config-template.h ${CMAKE_HEADER_OUTPUT_DIRECTORY}/config-store-config.h)
 
@@ -556,30 +595,29 @@ CommandLine configuration in those files instead.
   endif()
 
   # Process core-config
-  set(INT64X64 "128")
   if(MSVC)
     # MSVC doesn't support 128 bit soft operations, which is weird since they support 128 bit numbers... Clang does
     # support, but didn't expose them https://reviews.llvm.org/D41813
     set(INT64X64 "CAIRO")
   endif()
 
-  if(INT64X64 STREQUAL "128")
+  if(${INT64X64} MATCHES "INT128")
     include(buildsupport/custom_modules/FindInt128.cmake)
     find_int128_types()
     if(UINT128_FOUND)
       set(HAVE___UINT128_T TRUE)
       set(INT64X64_USE_128 TRUE)
     else()
-      message(WARNING "Int128 was not found. Falling back to long double.")
+      message(WARNING "Int128 was not found. Falling back to Cairo.")
       set(INT64X64 "CAIRO")
     endif()
   endif()
 
-  if(INT64X64 STREQUAL "CAIRO")
+  if(${INT64X64} MATCHES "CAIRO")
     set(INT64X64_USE_CAIRO TRUE)
   endif()
 
-  if(INT64X64 STREQUAL "DOUBLE")
+  if(${INT64X64} MATCHES "DOUBLE")
     # WSLv1 has a long double issue that will result in a few tests failing https://github.com/microsoft/WSL/issues/830
     include(CheckTypeSize)
     check_type_size("double" SIZEOF_DOUBLE)

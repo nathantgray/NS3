@@ -10,14 +10,10 @@ set(source_files
     model/pie-queue-disc.cc
     helper/traffic-control-helper.cc
     helper/queue-disc-container.cc
-    # Added in ns3.27
     model/mq-queue-disc.cc
-    # Added in ns3.28
     model/fifo-queue-disc.cc
     model/tbf-queue-disc.cc
-    # Added in ns3.29
     model/prio-queue-disc.cc
-    # added in ns3.30
     model/cobalt-queue-disc.cc
     model/fq-cobalt-queue-disc.cc
     model/fq-pie-queue-disc.cc
@@ -34,14 +30,10 @@ set(header_files
     model/pie-queue-disc.h
     helper/traffic-control-helper.h
     helper/queue-disc-container.h
-    # Added in ns3.27
     model/mq-queue-disc.h
-    # Added in ns3.28
     model/fifo-queue-disc.h
     model/tbf-queue-disc.h
-    # Added in ns3.29
     model/prio-queue-disc.h
-    # added in ns3.30
     model/cobalt-queue-disc.h
     model/fq-cobalt-queue-disc.h
     model/fq-pie-queue-disc.h

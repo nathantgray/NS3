@@ -54,6 +54,7 @@ option(NS3_CLANG_FORMAT "Enforce cody style with clang-format" OFF)
 option(NS3_CLANG_TIDY "Use clang-tidy static analysis" OFF)
 option(NS3_DOCS "Generate documentation" OFF)
 option(NS3_SANITIZE "Build with sanitizers" OFF)
+option(NS3_SCAN_PYTHON_BINDINGS "Scan python bindings" OFF)
 option(NS3_LINK_WHAT_YOU_USE "Use LWYU to determine unnecessary linked libraries" OFF)
 option(NS3_INCLUDE_WHAT_YOU_USE "Use IWYU to determine unnecessary headers included" OFF)
 

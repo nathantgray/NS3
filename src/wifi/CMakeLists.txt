@@ -113,6 +113,7 @@ set(source_files
     model/vht/vht-configuration.cc
     model/he/obss-pd-algorithm.cc
     model/he/constant-obss-pd-algorithm.cc
+    model/he/multi-user-scheduler.cc
     model/he/he-ru.cc
     model/phy-entity.cc
     model/non-ht/dsss-phy.cc
@@ -248,6 +249,7 @@ set(header_files
     model/vht/vht-configuration.h
     model/he/obss-pd-algorithm.h
     model/he/constant-obss-pd-algorithm.h
+    model/he/multi-user-scheduler.h
     model/he/he-ru.h
     model/reference/error-rate-tables.h
     model/phy-entity.h

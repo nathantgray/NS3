@@ -1,16 +1,22 @@
 set(name stats)
 
-if(${SQLITE_ENABLED})
-  # todo + have_sem = conf.check_nonfatal(header_name='semaphore.h', define_name='HAVE_SEMAPHORE_H') +
-  # conf.env['SEMAPHORE_ENABLED'] = have_sem + conf.write_config_header('ns3/stats-config.h', top=True)
-  set(SQLITE_SOURCES model/sqlite-data-output.cc)
-  set(SQLITE_HEADERS model/sqlite-data-output.h)
-else()
-  set(SQLITE_SOURCES)
+find_package(SQLite3)
+check_include_file_cxx(semaphore.h HAVE_SEMAPHORE_H)
+if(${SQLite3_FOUND})
+  set(sqlite_sources model/sqlite-data-output.cc)
+  set(sqlite_headers model/sqlite-data-output.h )
+
+  include_directories(${SQLite3_INCLUDE_DIRS})
+  set(sqlite_libraries ${SQLite3_LIBRARIES})
+
+  if(HAVE_SEMAPHORE_H)
+    list(APPEND sqlite_sources model/sqlite-output.cc)
+    list(APPEND sqlite_headers model/sqlite-output.h)
+  endif()
 endif()
 
 set(source_files
-    ${SQLITE_SOURCES}
+    ${sqlite_sources}
     helper/file-helper.cc
     helper/gnuplot-helper.cc
     model/data-calculator.cc
@@ -35,7 +41,7 @@ set(source_files
 )
 
 set(header_files
-    ${SQLITE_HEADERS}
+    ${sqlite_headers}
     model/stats.h
     helper/file-helper.h
     helper/gnuplot-helper.h
@@ -62,7 +68,7 @@ set(header_files
     model/histogram.h
 )
 
-set(libraries_to_link ${libcore})
+set(libraries_to_link ${libcore} ${sqlite_libraries})
 
 set(test_sources test/basic-data-calculators-test-suite.cc test/average-test-suite.cc test/double-probe-test-suite.cc
                  test/histogram-test-suite.cc

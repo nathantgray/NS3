@@ -726,6 +726,7 @@ CommandLine configuration in those files instead.
   set(ns3-external-libs)
   set(ns3-python-bindings ns${NS3_VER}-pybindings-${build_type})
   set(ns3-python-bindings-modules)
+  set_property(GLOBAL PROPERTY test-runner-test-id 0)
 
   foreach(libname ${libs_to_build})
     # Create libname of output library of module

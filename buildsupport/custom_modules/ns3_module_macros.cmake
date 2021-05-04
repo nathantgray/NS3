@@ -137,9 +137,14 @@ macro(
       endif()
 
       target_compile_definitions(${test${libname}} PRIVATE NS_TEST_SOURCEDIR="${folder}/${libname}/test")
+
       if(${NS3_PRECOMPILE_HEADERS})
         target_precompile_headers(${test${libname}} REUSE_FROM stdlib_pch)
       endif()
+
+
+      # Extract test suite names from ${test_sources} to add as ctests
+      test_runner_suites_as_ctests(${test_sources})
     endif()
   endif()
 

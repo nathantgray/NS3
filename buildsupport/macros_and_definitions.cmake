@@ -374,17 +374,29 @@ macro(process_options)
 
   # find required dependencies
   list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/buildsupport/custom_modules")
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/buildsupport/3rd_party")
 
-  # GTK2 Don't search for it if you don't have it installed, as it take an insane amount of time
-  if(${NS3_GTK2})
-    find_package(GTK2 QUIET)
-    if(NOT ${GTK2_FOUND})
-      message(WARNING "LibGTK2 was not found. Continuing without it.")
-    else()
-      link_directories(${GTK2_LIBRARY_DIRS})
-      include_directories(${GTK2_INCLUDE_DIRS})
-      add_definitions(${GTK2_CFLAGS_OTHER})
+
+  # GTK3 Don't search for it if you don't have it installed, as it take an insane amount of time
+  if(${NS3_GTK3})
+    # For some reason it refuses to find GTK on msys2,
+    # so we set the environment variable used by the FindGTK3.cmake as a hint
+    set(library_path ${CMAKE_CXX_COMPILER}) # e.g. E:/tools/msys64/mingw64/bin/g++.exe
+    get_filename_component(library_path ${library_path} DIRECTORY) # e.g. E:/tools/msys64/mingw64/bin/
+    get_filename_component(library_path ${library_path} DIRECTORY) # e.g. E:/tools/msys64/mingw64/
+    set(ENV{GTKMM_BASEPATH} ${library_path})
+
+    find_package(GTK3 QUIET)
+    if(NOT ${GTK3_FOUND})
+      message(WARNING "GTK3 was not found. Continuing without it.")
     endif()
+
+    find_package(HarfBuzz)
+    if(NOT ${HarfBuzz_FOUND})
+      message(WARNING "Harfbuzz is required by GTK")
+      set(GTK3_FOUND FALSE)
+    endif()
+    unset(library_path)
   endif()
 
   if(${NS3_STATIC})
@@ -602,7 +614,7 @@ CommandLine configuration in those files instead.
   endif()
 
   if(${INT64X64} MATCHES "INT128")
-    include(buildsupport/custom_modules/FindInt128.cmake)
+    include(buildsupport/3rd_party/FindInt128.cmake)
     find_int128_types()
     if(UINT128_FOUND)
       set(HAVE___UINT128_T TRUE)

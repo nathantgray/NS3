@@ -68,7 +68,7 @@ option(NS3_OPENFLOW "Build with Openflow support" OFF)
 option(NS3_ENABLE_BUILD_VERSION "Embed version info into libraries" OFF)
 option(NS3_GNUPLOT "Build with Gnuplot support" OFF)
 option(NS3_GSL "Build with GSL support" ON)
-option(NS3_GTK2 "Build with GTK2 support" ON)
+option(NS3_GTK3 "Build with GTK3 support" ON)
 option(NS3_MPI "Build with MPI support" ON)
 option(NS3_NSC "Build with NSC support" OFF) # currently not supported
 option(NS3_PRECOMPILE_HEADERS "Precompile module headers to speed up compilation" OFF)

@@ -109,7 +109,7 @@ jobs:
   Codecov:
     runs-on: ubuntu-latest
     needs: Ubuntu
-    #if: needs.Ubuntu.outputs.cache_hit_rate != '100.00'    
+    if: needs.Ubuntu.outputs.cache_hit_rate != '100.00'
     steps:
       - uses: actions/checkout@v1
       - name: Install required packages
@@ -148,7 +148,7 @@ jobs:
       - name: Build ns-3
         run: |
           cd cmake-cache
-          cmake --build . -j2
+          cmake --build . -j3
       - name: Print ccache statistics
         id: ccache_results
         run: |

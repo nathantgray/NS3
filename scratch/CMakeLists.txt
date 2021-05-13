@@ -5,9 +5,15 @@ set(DONT_BUILD)
 get_property(local-ns3-libs GLOBAL PROPERTY ns3-libs)
 
 foreach(scratch_src ${scratches})
+  # Get source filename without path or extension
   get_filename_component(scratch_name ${scratch_src} NAME)
   string(REGEX REPLACE "\\.[^.]*$" "" scratch_name ${scratch_name})
 
+  # Get source absolute path and transform into relative path
+  get_filename_component(scratch_absolute_directory ${scratch_src} DIRECTORY)
+  string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR} "" scratch_directory ${scratch_absolute_directory})
+
+  # Build scratch if not listed as a DONT_BUILD
   string(FIND "${DONT_BUILD}" "${scratch_name}" res)
   if(res LESS 0)
     add_executable(${scratch_name} "${scratch_src}")
@@ -16,6 +22,6 @@ foreach(scratch_src ${scratches})
     else()
       target_link_libraries(${scratch_name} "${local-ns3-libs}" "${ns3-contrib-libs}")
     endif()
-    set_runtime_outputdirectory(${scratch_name} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/scratch/)
+    set_runtime_outputdirectory(${scratch_name} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/scratch/${scratch_directory})
   endif()
 endforeach()

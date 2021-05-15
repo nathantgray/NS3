@@ -276,6 +276,10 @@ macro(process_options)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,leak,thread,undefined,memory -g")
   endif()
 
+  if( ${NS3_NATIVE_OPTIMIZATIONS} AND ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU"))
+    add_compile_options(-march=native -mtune=native)
+  endif()
+
   if(${NS3_LINK_TIME_OPTIMIZATION})
     # Link-time optimization (LTO) if available
     include(CheckIPOSupported)
@@ -701,6 +705,7 @@ CommandLine configuration in those files instead.
   )
     set(NS3_TAP OFF)
     set(NS3_EMU OFF)
+    list(REMOVE_ITEM libs_to_build fd-net-device)
     message(WARNING "${PLATFORM_UNSUPPORTED_PRE} TAP and EMU ${PLATFORM_UNSUPPORTED_POST}")
   endif()
 

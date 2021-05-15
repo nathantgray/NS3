@@ -39,7 +39,7 @@ jobs:
         run: |
           mkdir cmake-cache
           cd cmake-cache
-          cmake -DCMAKE_BUILD_TYPE=minsizerel -DNS3_EXAMPLES=ON -DNS3_TESTS=ON -G"Ninja"  ..
+          cmake -DCMAKE_BUILD_TYPE=minsizerel -DNS3_EXAMPLES=ON -DNS3_TESTS=ON -DNS3_LINK_TIME_OPTIMIZATION=ON -G"Ninja"  ..
       - name: Build ns-3
         run: |
           cd cmake-cache

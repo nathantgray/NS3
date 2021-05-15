@@ -69,6 +69,7 @@ option(NS3_ENABLE_BUILD_VERSION "Embed version info into libraries" OFF)
 option(NS3_GNUPLOT "Build with Gnuplot support" OFF)
 option(NS3_GSL "Build with GSL support" ON)
 option(NS3_GTK3 "Build with GTK3 support" ON)
+option(NS3_LINK_TIME_OPTIMIZATION "Build with link-time optimization" OFF)
 option(NS3_MPI "Build with MPI support" ON)
 option(NS3_NSC "Build with NSC support" OFF) # currently not supported
 option(NS3_PRECOMPILE_HEADERS "Precompile module headers to speed up compilation" OFF)

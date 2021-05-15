@@ -89,7 +89,7 @@ if(${MSVC} OR ${XCODE})
   endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 endif()
 
-# fPIC and fPIE
+# fPIC (position-independent code) and fPIE (position-independent executable)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Include the cmake file that provides a Hunter-like interface to VcPkg
@@ -274,6 +274,17 @@ macro(process_options)
 
   if(${NS3_SANITIZE})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,leak,thread,undefined,memory -g")
+  endif()
+
+  if(${NS3_LINK_TIME_OPTIMIZATION})
+    # Link-time optimization (LTO) if available
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT LTO_AVAILABLE OUTPUT output)
+    if(LTO_AVAILABLE)
+      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    else()
+      message(WARNING "Link-time optimization (LTO) is not supported: ${output}")
+    endif()
   endif()
 
   if(${NS3_LINK_WHAT_YOU_USE} AND (NOT WIN32))

@@ -370,35 +370,5 @@ macro(write_module_header name header_files)
   list(APPEND contents "
 #endif "
   )
-
-  # Check if a module header already exists and if contents match. If they do, don't write a new one
-  set(write_header FALSE)
-  if(NOT (EXISTS ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h))
-    set(write_header TRUE)
-  else()
-    file(READ ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h old_contents)
-
-    # Get number of headers included by old module header
-    if(${old_contents} MATCHES ".h")
-      set(num_old_headers ${CMAKE_MATCH_COUNT})
-    endif()
-
-    # Compare each new header with older ones
-    foreach(header ${header_files})
-      get_filename_component(header_name ${header} NAME)
-      if(${old_contents} MATCHES ${header_name})
-        math(EXPR num_old_headers "${num_old_headers}-1")
-      else()
-        set(write_header TRUE)
-      endif()
-    endforeach()
-
-    # If number of headers don't match number of new ones, write a new one
-    if(${num_old_headers} GREATER "0")
-      set(write_header TRUE)
-    endif()
-  endif()
-  if(write_header)
-    file(WRITE ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h ${contents})
-  endif()
+  file(WRITE ${CMAKE_HEADER_OUTPUT_DIRECTORY}/${name}-module.h ${contents})
 endmacro()

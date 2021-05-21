@@ -93,6 +93,10 @@ if(${NS3_PTHREAD})
   endif()
 endif()
 
+if(WSLv1)
+  set(wslv1_sources ${PROJECT_SOURCE_DIR}/buildsupport/wslv1_workaround.cc)
+endif()
+
 if(${NS3_EXAMPLES} AND (NOT WIN32))
   set(example_as_test_sources model/example-as-test.cc)
   set(example_as_test_headers model/example-as-test.h)
@@ -109,6 +113,7 @@ endif()
 
 # Define core lib sources
 set(source_files
+    ${wslv1_sources}
     ${rt_sources}
     ${osclock_sources}
     ${int64x64_sources}
@@ -319,3 +324,7 @@ set(test_sources
 
 # Build core lib
 build_lib("${name}" "${source_files}" "${header_files}" "${libraries_to_link}" "${test_sources}")
+
+if(WSLv1)
+  target_compile_definitions(${libcore-obj} PRIVATE -D__WSLv1__)
+endif()

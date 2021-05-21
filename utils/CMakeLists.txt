@@ -18,6 +18,10 @@ if(${NS3_TESTS})
   endif()
   set_runtime_outputdirectory(test-runner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/)
 
+  if(WSLv1)
+    target_compile_definitions(test-runner PRIVATE -D__WSLv1__)
+  endif()
+
   add_executable(bench-simulator bench-simulator.cc)
   target_link_libraries(bench-simulator ${libcore})
   set_runtime_outputdirectory(bench-simulator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/)

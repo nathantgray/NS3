@@ -96,7 +96,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(buildsupport/vcpkg_hunter.cmake)
 
 # Set compiler options and get command to force unused function linkage (useful for libraries)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(LIB_AS_NEEDED_PRE)
 set(LIB_AS_NEEDED_POST)
